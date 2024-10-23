@@ -1,76 +1,37 @@
-from http import HTTPStatus
+from fastapi import FastAPI
 
-from fastapi import FastAPI, HTTPException
+from fast_rafa.routes.category import router as category_router
 
-from fast_rafa.schema import Message
-from fast_rafa.user import (
-    UserDb,
-    UserList,
-    UserPublic,
-    UserSchema,
+# from fast_rafa.routes.favorite import router as favorite_router
+from fast_rafa.routes.organization import router as organization_router
+
+# from fast_rafa.routes.post import router as post_router
+from fast_rafa.routes.user import router as user_router
+
+app = FastAPI(
+    title='fast_rafa',
+    version='0.1.0',
+    description='API para o projeto fast_rafa',
 )
 
-app = FastAPI()
+app.include_router(user_router,
+                   prefix='/api/v1/users',
+                   tags=['Users'])
 
-database = []
+# app.include_router(post_router, prefix='/api/v1/posts', tags=['Posts'])
 
-
-@app.get('/', status_code=HTTPStatus.OK, response_model=Message)
-def read_root():
-    return {'message': 'Olar mundo!'}
-
-
-@app.post('/users', status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: UserSchema):
-    user_db = UserDb(
-        id=len(database) + 1,
-        # ** desempacota o dicionário
-        **user.model_dump(),
-    )
-    database.append(user_db)
-    return user_db
-
-
-@app.get('/users', status_code=HTTPStatus.OK, response_model=UserList)
-def read_users():
-    return {'users': database}
-
-
-@app.put(
-    '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
+app.include_router(
+    category_router,
+    prefix='/api/v1/categories',
+    tags=['Categories']
 )
-def update_user(user_id: int, user: UserSchema):
-    """Update user"""
-    if user_id <= 0 or user_id > len(database):
-        # raise = Erguer / Lançar / Levantar uma exceção
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado'
-        )
 
-    user_db = UserDb(id=user_id, **user.model_dump())
-    database[user_id - 1] = user_db
-    return user_db
+# app.include_router(
+#     favorite_router, prefix='/api/v1/favorites', tags=['Favorites']
+# )
 
-
-@app.delete('/users/{user_id}', response_model=Message)
-def delete_user(user_id: int):
-    """Deletar usuário"""
-    if user_id < 1 or user_id > len(database):
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail='Usuário não encontrado',
-        )
-    del database[user_id - 1]
-    return {'message': 'Usuário deletado com sucesso'}
-
-
-@app.get(
-    '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
-)
-def read_user(user_id: int):
-    if user_id < 1 or user_id > len(database):
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail='Usuário não encontrado',
-        )
-    return database[user_id - 1]
+app.include_router(
+     organization_router,
+     prefix='/api/v1/organizations',
+     tags=['Organizations']
+ )

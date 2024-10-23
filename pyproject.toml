@@ -1,13 +1,16 @@
 [tool.poetry]
 name = "fast-rafa"
 version = "0.1.0"
-description = "Sistema para Redistribuição de Alimentos e Fomento Alimentar"
+description = "Sistema de Redistribuição e Apoio Alimentar"
 authors = ["Eduardo Lira <eduardolirainfo@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "3.12.*"
 fastapi = "^0.112.1"
+sqlalchemy = "^2.0.34"
+pydantic-settings = "^2.5.2"
+alembic = "^1.13.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -40,6 +43,8 @@ run = 'fastapi dev fast_rafa/app.py'
 pre_test = 'task lint'
 test = 'pytest -s -x --cov=fast_rafa -vv'
 post_test = 'coverage html'
+seed = "python -c 'from fast_rafa.seeds import seed_all'"
+undo = "python -c 'from fast_rafa.seeds import undo_all'"
 
 [build-system]
 requires = ["poetry-core"]
