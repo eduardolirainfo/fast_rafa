@@ -111,18 +111,6 @@ class Organization:
         return cls.dict(exclude_unset=exclude_unset)
 
     @classmethod
-    def get_all(cls):
-        return cls.objects.all()
-
-    @classmethod
-    def get(cls, id: int):
-        return cls.objects.get(id=id)
-
-    @classmethod
-    def filter(cls, **kwargs):
-        return cls.objects.filter(**kwargs)
-
-    @classmethod
     def update(cls, instance: 'Organization', data: Dict):
         for key, value in data.items():
             setattr(instance, key, value)
@@ -132,18 +120,6 @@ class Organization:
     @classmethod
     def delete(cls, id: int):
         return cls.objects.filter(id=id).delete()
-
-    @classmethod
-    def count(cls):
-        return cls.objects.count()
-
-    @classmethod
-    def exists(cls, id: int):
-        return cls.objects.filter(id=id).exists()
-
-    @classmethod
-    def first(cls):
-        return cls.objects.first()
 
     @classmethod
     def last(cls):

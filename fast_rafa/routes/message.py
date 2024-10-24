@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from fastapi import APIRouter
 
-from fast_rafa.schemas import MessageSchema as Message
+from fast_rafa.models import Message
 
 router = APIRouter()  # Use APIRouter aqui
 

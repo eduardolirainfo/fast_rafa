@@ -1,3 +1,6 @@
+from typing import Optional
+
+from pydantic import BaseModel
 from sqlalchemy import ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -8,16 +11,32 @@ from fast_rafa.models.base import table_registry
 class Favorite:
     __tablename__ = 'favorites'
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[Optional[int]] = mapped_column(
+        Integer, primary_key=True, autoincrement=True)
     id_postagem: Mapped[int] = mapped_column(Integer, ForeignKey('posts.id'))
     id_usuario: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))
+
+    def __init__(self, id_postagem: int, id_usuario: int):
+        self.id_postagem = id_postagem
+        self.id_usuario = id_usuario
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'id_postagem': self.id_postagem,
+            'id_usuario': self.id_usuario,
+        }
+
+    class Create(BaseModel):
+        id_postagem: int
+        id_usuario: int
 
     posts = relationship('Post', back_populates='favorites')
     users = relationship('User', back_populates='favorites')
 
     @classmethod
-    def create(cls, data: dict):
-        favorite = cls(**data)
+    def create(cls, data: Create):
+        favorite = cls(**data.dict())
         return favorite
 
     @classmethod
@@ -30,12 +49,12 @@ class Favorite:
         favorite = cls(**data)
         return favorite
 
-    @classmethod
-    def read_by_name(cls, name: str):
-        favorite = cls.query.filter_by(name=name).first().upper()
-        return favorite
+    class UpdateRequest(BaseModel):
+        id_postagem: Optional[int]
+        id_usuario: Optional[int]
 
-    @classmethod
-    def read_by_id(cls, id: int):
-        favorite = cls.query.get(id)
-        return favorite
+    class UpdateResponse(BaseModel):
+        message: str
+
+    class DeleteResponse(BaseModel):
+        message: str

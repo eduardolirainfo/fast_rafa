@@ -1,9 +1,11 @@
-from datetime import datetime
+import re
 from http import HTTPStatus
-from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
+from fast_rafa.database import get_session
 from fast_rafa.models.favorite import Favorite
 from fast_rafa.models.post import Post
 from fast_rafa.models.user import User
@@ -16,93 +18,184 @@ router = APIRouter()
     status_code=HTTPStatus.CREATED,
     response_model=Favorite,
 )
-def create_favorite(id_usuario: int, id_postagem: int):
+def create_favorite(
+    id_usuario: int,
+    id_postagem: int,
+    db: Session = Depends(get_session)
+):
+    usuario = db.query(User).filter(User.id == id_usuario).first()
 
-    # Verifica o tipo e o conteúdo dos itens no banco de dados
-    for item in table_registry:
-        print(f'Item: {item}, Tipo: {type(item)}')
-
-    # Verifica se o usuário existe
-    user_exists = any(
-        user.id == id_usuario
-        for user in table_registry
-        if isinstance(user, User)
-    )
-    print(f'Usuário encontrado: {user_exists}')
-    if not user_exists:
+    if not usuario:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=f'Usuário com id {id_usuario} não encontrado',
+            detail='Usuário não encontrado'
         )
 
-    # Verifica se a postagem existe
-    post_exists = any(
-        post.id == id_postagem
-        for post in table_registry
-        if isinstance(post, Post)
-    )
-    print(f'Postagem encontrada: {post_exists}')
-    if not post_exists:
+    postagem = db.query(Post).filter(Post.id == id_postagem).first()
+
+    if not postagem:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=f'Postagem com id {id_postagem} não encontrada',
+            detail='Postagem não encontrada'
         )
 
-    # Cria um novo favorito
-    favorite_db = Favorite(
-        id=len(table_registry) + 1,
-        idusuario=id_usuario,
-        idpostagem=id_postagem,
-        criado_em=datetime.utcnow(),
-        atualizado_em=datetime.utcnow(),
-    )
+    favorito_existente = db.query(Favorite).filter_by(
+        id_usuario=id_usuario, id_postagem=id_postagem
+    ).first()
 
-    # Adiciona o favorito ao banco de dados
-    table_registry.append(favorite_db)
-    return favorite_db
+    if favorito_existente:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Este item já foi favoritado pelo usuário."
+        )
+
+    novo_favorito = Favorite(id_usuario=id_usuario, id_postagem=id_postagem)
+    try:
+        db.add(novo_favorito)
+        db.commit()
+        db.refresh(novo_favorito)
+    except IntegrityError as e:
+        db.rollback()
+        error_message = str(e.orig)
+
+        match = re.search(
+            r'UNIQUE constraint failed: users\.(\w+)', error_message)
+        if match:
+            field_name = match.group(1).replace('_', ' ').capitalize()
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=f"Já existe um favorito com este(a) {field_name}."
+            )
+        else:
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail="Erro ao adicionar favorito."
+            )
+
+    return novo_favorito
 
 
-@router.get('/', status_code=HTTPStatus.OK, response_model=List[Favorite])
-def read_favorites():
-    return table_registry
+@router.get('/{id_favorite}', status_code=HTTPStatus.OK)
+def read_favorite_by_id(
+    id_favorite: int,
+    db: Session = Depends(get_session)
+):
+    favorito = db.query(Favorite).filter(
+        Favorite.id == id_favorite
+    ).first()
+
+    if not favorito:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Favorito não encontrado'
+        )
+
+    return favorito
 
 
 @router.get(
-    '/{favorite_id}', status_code=HTTPStatus.OK, response_model=Favorite
+    '/usuario/{id_usuario}',
+    status_code=HTTPStatus.OK
 )
-def read_favorite(favorite_id: int):
-    if favorite_id <= 0 or favorite_id > len(table_registry):
+def read_favorites_by_user(
+    id_usuario: int,
+    db: Session = Depends(get_session)
+):
+    usuario = db.query(User).filter(User.id == id_usuario).first()
+
+    if not usuario:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Favorito não encontrado'
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Usuário não encontrado'
         )
-    return table_registry[favorite_id - 1]
+
+    favoritos = db.query(Favorite).filter(
+        Favorite.id_usuario == id_usuario
+    ).all()
+
+    if not favoritos:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Nenhum favorito encontrado'
+        )
+
+    return favoritos
 
 
-@router.put(
-    '/{favorite_id}', status_code=HTTPStatus.OK, response_model=Favorite
+@router.get(
+    '/postagem/{id_postagem}',
+    status_code=HTTPStatus.OK
 )
-def update_favorite(favorite_id: int, favorite: Favorite):
-    # Verifica se o id do favorito é válido
-    if favorite_id < 1 or favorite_id > len(table_registry):
+def read_favorites_by_post(
+    id_postagem: int,
+    db: Session = Depends(get_session)
+):
+    postagem = db.query(Post).filter(Post.id == id_postagem).first()
+
+    if not postagem:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Favorito não encontrado'
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Postagem não encontrada'
         )
 
-    existing_favorite = table_registry[favorite_id - 1]
-    updated_data = favorite.model_dump(exclude_unset=True)
-    updated_favorite = existing_favorite.copy(update=updated_data)
-    updated_favorite.atualizado_em = datetime.utcnow()
+    favoritos = db.query(Favorite).filter(
+        Favorite.id_postagem == id_postagem
+    ).all()
 
-    table_registry[favorite_id - 1] = updated_favorite
-
-    return updated_favorite
-
-
-@router.delete('/{favorite_id}', response_model=Favorite)
-def delete_favorite(favorite_id: int):
-    if favorite_id < 1 or favorite_id > len(table_registry):
+    if not favoritos:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Favorito não encontrado'
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Nenhum favorito encontrado'
         )
-    deleted_favorite = table_registry.pop(favorite_id - 1)
-    return deleted_favorite
+
+    return favoritos
+
+
+@router.delete(
+    '/{id_favorite}',
+    status_code=HTTPStatus.OK,
+    response_model=User.DeleteResponse,
+)
+def delete_favorite(
+    id_favorite: int,
+    db: Session = Depends(get_session)
+):
+    favorito = db.query(Favorite).filter(Favorite.id == id_favorite).first()
+
+    if not favorito:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Favorito não encontrado'
+        )
+
+    try:
+        db.delete(favorito)
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        error_message = str(e.orig)
+
+        if ('foreign key constraint' in error_message.lower() or
+                'constraint failed' in error_message.lower()):
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=(
+                    "Não é possível excluir o favorito, "
+                    "pois está associado a outros registros."
+                ),
+            )
+        else:
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail="Erro ao excluir o favorito.",
+            )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Erro inesperado ao excluir o favorito: {str(e)}"
+        )
+
+    return User.DeleteResponse(
+        message="Favorito excluído com sucesso."
+    )

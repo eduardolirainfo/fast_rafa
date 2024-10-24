@@ -182,7 +182,8 @@ def delete_organization(
         db.rollback()
         error_message = str(e.orig)
 
-        if 'foreign key constraint' in error_message.lower():
+        if ('foreign key constraint' in error_message.lower() or
+                'constraint failed' in error_message.lower()):
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
                 detail=(

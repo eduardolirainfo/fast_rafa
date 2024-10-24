@@ -1,8 +1,9 @@
+
+import re
 from http import HTTPStatus
 from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fast_rafa.database import get_session
@@ -13,29 +14,32 @@ router = APIRouter()
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=Category)
 def create_category(
-    categoria: str,
+    categoria: Category.Create,
     db: Session = Depends(get_session)
 ):
+    nova_categoria = Category.create(categoria)
 
-    categoria = categoria.strip()
-    categoria_existe = (
-        db.query(Category)
-        .filter(
-            func.upper(Category.categoria) == categoria.strip().upper()
+    try:
+        db.add(nova_categoria)
+        db.commit()
+        db.refresh(nova_categoria)
+    except IntegrityError as e:
+        db.rollback()
+        error_message = str(e.orig)
+
+        match = re.search(
+            r'UNIQUE constraint failed: categories\.categoria', error_message
         )
-        .first()
-    )
-
-    if categoria_existe:
-        raise HTTPException(
-            status_code=HTTPStatus.CONFLICT,
-            detail='Uma categoria com este nome já existe.'
-        )
-    nova_categoria = Category.create(categoria=categoria)
-
-    db.add(nova_categoria)
-    db.commit()
-    db.refresh(nova_categoria)
+        if match:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail="Essa categoria já existe."
+            )
+        else:
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail="Erro ao criar a categoria."
+            )
 
     return nova_categoria
 
@@ -44,7 +48,7 @@ def create_category(
 def read_categories(
    db: Session = Depends(get_session)
 ):
-    todas_categorias = db.scalars(select(Category)).all()
+    todas_categorias = db.query(Category).all()
 
     if not todas_categorias:
         raise HTTPException(
@@ -60,9 +64,8 @@ def read_categories(
     '/{category_id}', status_code=HTTPStatus.OK
 )
 def read_category_by_id(category_id: int, db: Session = Depends(get_session)):
-    categoria_db = db.scalar(
-        select(Category).where(Category.id == category_id)
-    )
+    categoria_db = db.query(Category).filter(
+        Category.id == category_id).first()
 
     if not categoria_db:
         raise HTTPException(
@@ -79,21 +82,17 @@ def read_category_by_name(
     category_name: str,
     db: Session = Depends(get_session)
 ):
-
-    categoria_formatada = Category.read_by_name(category_name)
-
-    categoria_db = db.scalars(
-        select(Category).where(
-            func.upper(Category.categoria).like(f'%{categoria_formatada}%')
-        )
+    categorias = db.query(Category).filter(
+        Category.categoria.ilike(f'%{category_name}%')
     ).all()
 
-    if not categoria_db:
+    if not categorias:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Categoria não encontrada'
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Nenhuma categoria encontrada'
         )
 
-    return [categoria.to_dict() for categoria in categoria_db]
+    return categorias
 
 
 @router.put("/{category_id}",
@@ -109,42 +108,51 @@ def update_category(
         raise HTTPException(status_code=404, detail="Categoria não encontrada")
 
     nome_categoria_original = categoria.categoria.strip()
-    nome_categoria_novo = category_data.categoria.strip()
+    # nome_categoria_novo = category_data.categoria.strip()
 
-    if nome_categoria_original == nome_categoria_novo:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail='O nome da categoria não pode ser o mesmo.'
+    # if nome_categoria_original == nome_categoria_novo:
+    #     raise HTTPException(
+    #         status_code=HTTPStatus.BAD_REQUEST,
+    #         detail="O nome da categoria não pode ser o mesmo."
+    #     )
+
+    categoria_atualizada = Category.update(categoria, category_data.dict())
+
+    try:
+        db.commit()
+        db.refresh(categoria_atualizada)
+    except IntegrityError as e:
+        db.rollback()
+        error_message = str(e.orig)
+
+        match = re.search(
+            r'UNIQUE constraint failed: categories\.categoria', error_message
         )
-
-    categoria_existe = (
-        db.query(Category)
-        .filter(func.upper(Category.categoria) == nome_categoria_novo.upper())
-        .first()
-    )
-
-    if categoria_existe:
-        raise HTTPException(
-            status_code=HTTPStatus.CONFLICT,
-            detail='Uma categoria com este nome já existe.'
-        )
-
-    updated_category = Category.update(categoria, category_data.categoria)
-
-    db.add(updated_category)
-    db.commit()
-    db.refresh(updated_category)
+        if match:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail="Essa categoria já existe."
+            )
+        else:
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail="Erro ao criar a categoria."
+            )
 
     return Category.UpdateResponse(
         message=(
             f'A categoria "{nome_categoria_original}" foi atualizada para '
-            f'"{nome_categoria_novo}".'
+            f'"{categoria_atualizada.categoria}".'
         )
     )
 
 
-@router.delete('/{category_id}', response_model=Category.DeleteResponse)
-def delete_category(category_id: int, db: Session = Depends(get_session)):
+@router.delete('/{category_id}',
+               response_model=Category.DeleteResponse)
+def delete_category(
+    category_id: int,
+    db: Session = Depends(get_session)
+):
     category = db.query(Category).filter(Category.id == category_id).first()
 
     if not category:
@@ -153,13 +161,30 @@ def delete_category(category_id: int, db: Session = Depends(get_session)):
             detail='Categoria não encontrada'
         )
 
-    deleted_category = Category.delete(categoria=category.categoria)
-    db.delete(category)
-    db.commit()
+    try:
+        db.delete(category)
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        error_message = str(e.orig)
 
+        if ('foreign key constraint' in error_message.lower() or
+                'constraint failed' in error_message.lower()):
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=(
+                    "Não é possível excluir essa categoria, "
+                    "pois ela está associada a uma postagem."
+                ),
+            )
+        else:
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail='Erro ao deletar a categoria.'
+            )
     return Category.DeleteResponse(
         message=(
-            f'A categoria "{deleted_category.categoria}" '
+            f'A categoria "{category.categoria}" '
             'foi deletada com sucesso.'
         )
     )

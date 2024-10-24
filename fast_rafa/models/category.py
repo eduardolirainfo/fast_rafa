@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Dict, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import Integer, String, func
+from sqlalchemy import DateTime, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fast_rafa.models.base import table_registry
@@ -13,17 +13,21 @@ class Category:
     __tablename__ = 'categories'
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
-    categoria: Mapped[str] = mapped_column(String(25), nullable=False)
-    criado_em: Mapped[datetime] = mapped_column(default=func.now())
-    atualizado_em: Mapped[Optional[datetime]] = mapped_column(
-        default=func.now(), onupdate=func.now()
+    categoria: Mapped[str] = mapped_column(
+        String(25), nullable=False, unique=True)
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now())
+    atualizado_em: Mapped[datetime] = mapped_column(
+        DateTime, default=func.now(), onupdate=datetime.now()
     )
 
-    posts = relationship('Post', back_populates='categories')
-
-    def __init__(self, categoria: str, id: Optional[int] = None):
+    def __init__(self, categoria: str,
+                 id: Optional[int] = None,
+                 criado_em=None, atualizado_em=None):
         self.categoria = categoria
         self.id = id
+        self.criado_em = criado_em
+        self.atualizado_em = atualizado_em
 
     def to_dict(self) -> Dict[str, Optional[str]]:
         return {
@@ -34,28 +38,30 @@ class Category:
             if self.atualizado_em else None
         }
 
-    @classmethod
-    def create(cls, categoria: str):
-        return cls(categoria=categoria)
+    posts = relationship('Post', back_populates='categories')
 
-    # Atualização para receber apenas a categoria
+    class Create(BaseModel):
+        categoria: str
+        created_at: datetime = datetime.now()
+        updated_at: datetime = datetime.now()
+
     @classmethod
-    def update(cls, instance: "Category", categoria: str):
-        instance.categoria = categoria
-        instance.atualizado_em = datetime.now()  # Atualiza o timestamp
+    def create(cls, data: Create) -> 'Category':
+        return cls(
+            categoria=data.categoria,
+            criado_em=data.created_at,
+            atualizado_em=data.updated_at
+        )
+
+    @classmethod
+    def update(cls, instance: 'Category', data: Dict):
+        for key, value in data.items():
+            setattr(instance, key, value)
         return instance
 
     @classmethod
     def delete(cls, categoria: str):
         return cls(categoria=categoria)
-
-    @classmethod
-    def read_by_name(cls, categoria: str):
-        return categoria.strip().upper()
-
-    @classmethod
-    def read_by_id(cls, category_id: int):
-        return cls(id=category_id, categoria="")
 
     class UpdateRequest(BaseModel):
         categoria: str

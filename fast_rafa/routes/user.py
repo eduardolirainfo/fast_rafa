@@ -1,5 +1,6 @@
 import re
 from http import HTTPStatus
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -9,7 +10,6 @@ from fast_rafa.database import get_session
 from fast_rafa.models.favorite import Favorite
 from fast_rafa.models.organization import Organization
 from fast_rafa.models.user import User
-from typing import List
 
 router = APIRouter()
 
@@ -19,10 +19,10 @@ def create_user(
     usuario: User.Create,
     db: Session = Depends(get_session)
 ):
-    organizations = db.query(Organization).filter(
+    organizacao = db.query(Organization).filter(
         Organization.id == usuario.id_organizacao).all()
 
-    if not organizations:
+    if not organizacao:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail='Organização não encontrada',
@@ -217,7 +217,8 @@ def delete_user(
         db.rollback()
         error_message = str(e.orig)
 
-        if 'foreign key constraint' in error_message.lower():
+        if ('foreign key constraint' in error_message.lower() or
+                'constraint failed' in error_message.lower()):
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
                 detail=(
