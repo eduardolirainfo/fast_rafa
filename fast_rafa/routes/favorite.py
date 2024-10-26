@@ -94,14 +94,18 @@ def read_favorite_by_id(
 
 
 @router.get(
-    '/usuario/{id_usuario}',
-    status_code=HTTPStatus.OK
+    '/user/{id_usuario}',
+    status_code=HTTPStatus.OK,
+    response_model=list[Favorite]
 )
 def read_favorites_by_user(
     id_usuario: int,
+    skip: int = 0,
+    limit: int = 10,
     db: Session = Depends(get_session)
 ):
-    usuario = db.query(User).filter(User.id == id_usuario).first()
+    usuario = db.query(User).filter(
+        User.id == id_usuario).offset(skip).limit(limit).all()
 
     if not usuario:
         raise HTTPException(
@@ -123,7 +127,7 @@ def read_favorites_by_user(
 
 
 @router.get(
-    '/postagem/{id_postagem}',
+    '/post/{id_postagem}',
     status_code=HTTPStatus.OK
 )
 def read_favorites_by_post(

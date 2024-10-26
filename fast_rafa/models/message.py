@@ -23,9 +23,9 @@ class Mensagem():
     url_imagem: Mapped[Optional[str]] = mapped_column(
         String(2048), nullable=True)
     criado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now)
+        DateTime, default=datetime.utcnow())
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now, onupdate=func.now)
+        DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow())
 
     mensagens = relationship('message_its', back_populates='messages')
     posts = relationship('Post', back_populates='messages')

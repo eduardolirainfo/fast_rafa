@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional
 
 from pydantic import BaseModel
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func
@@ -27,12 +27,12 @@ class Post:
     )
     url_imagem_post: Mapped[Optional[str]] = mapped_column(default=None)
     data_validade: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=func.now())
+        DateTime, nullable=False, default=datetime.utcnow())
     status: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     criado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now())
+        DateTime, default=datetime.utcnow())
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), onupdate=datetime.now()
+        DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow()
     )
 
     def __init__(
@@ -109,9 +109,10 @@ class Post:
         )
 
     @classmethod
-    def update(cls, data: dict):
-        post = cls(**data)
-        return post
+    def update(cls, instance: 'Post', data: Dict):
+        for key, value in data.items():
+            setattr(instance, key, value)
+        return instance
 
     @classmethod
     def delete(cls, data: dict):
@@ -129,6 +130,7 @@ class Post:
         url_imagem_post: Optional[str]
         data_validade: Optional[datetime]
         status: Optional[int]
+        atualizado_em: Optional[datetime] = datetime.utcnow()
 
     class UpdateResponse(BaseModel):
         message: str

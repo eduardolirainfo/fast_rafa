@@ -4,3 +4,4 @@ from .user import User  # noqa
 from .post import Post  # noqa
 from .favorite import Favorite  # noqa
 from .delivery import Delivery  # noqa
+from .calendar import Calendar  # noqa

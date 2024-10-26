@@ -2,6 +2,7 @@
 import re
 from http import HTTPStatus
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -44,11 +45,15 @@ def create_category(
     return nova_categoria
 
 
-@router.get('/', status_code=HTTPStatus.OK)
+@router.get('/', status_code=HTTPStatus.OK,
+            response_model=list[Category])
 def read_categories(
-   db: Session = Depends(get_session)
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_session)
 ):
-    todas_categorias = db.query(Category).all()
+    todas_categorias = db.query(
+        Category).offset(skip).limit(limit).all()
 
     if not todas_categorias:
         raise HTTPException(
@@ -56,8 +61,7 @@ def read_categories(
             detail='Nenhuma categoria encontrada'
         )
 
-    categorias_dics = [categoria.to_dict() for categoria in todas_categorias]
-    return {'categorias': categorias_dics}
+    return todas_categorias
 
 
 @router.get(

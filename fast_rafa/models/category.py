@@ -16,9 +16,9 @@ class Category:
     categoria: Mapped[str] = mapped_column(
         String(25), nullable=False, unique=True)
     criado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now())
+        DateTime, default=datetime.utcnow())
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), onupdate=datetime.now()
+        DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow()
     )
 
     def __init__(self, categoria: str,
@@ -42,8 +42,8 @@ class Category:
 
     class Create(BaseModel):
         categoria: str
-        created_at: datetime = datetime.now()
-        updated_at: datetime = datetime.now()
+        created_at: datetime = datetime.utcnow()
+        updated_at: datetime = datetime.utcnow()
 
     @classmethod
     def create(cls, data: Create) -> 'Category':

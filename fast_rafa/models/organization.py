@@ -6,6 +6,7 @@ from sqlalchemy import Boolean, DateTime, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fast_rafa.models.base import table_registry
+from fast_rafa.models.delivery import Delivery
 
 
 @table_registry.mapped_as_dataclass
@@ -38,9 +39,9 @@ class Organization:
         String(255), nullable=False, unique=True
     )
     criado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now())
+        DateTime, default=datetime.utcnow())
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), onupdate=datetime.now()
+        DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow()
     )
 
     def __init__(self, id_federal, nao_governamental,
@@ -104,7 +105,22 @@ class Organization:
         foreign_keys='Post.id_organizacao',
     )
 
-    deliveries = relationship("Delivery", back_populates="organizations")
+    deliveries_as_org = relationship(
+        "Delivery",
+        back_populates="organizations",
+        foreign_keys='Delivery.id_organizacao'
+    )
+    deliveries_as_ong = relationship(
+        "Delivery",
+        back_populates="ongs",
+        foreign_keys='Delivery.id_ong'
+    )
+
+    calendars = relationship("Calendar", back_populates="organizations")
+
+    events = relationship("Event", back_populates="organizations")
+
+    watchlists = relationship("Watchlist", back_populates="organizations")
 
     @classmethod
     def model_dump(cls, exclude_unset=False):

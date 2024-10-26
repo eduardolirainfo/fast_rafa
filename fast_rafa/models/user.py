@@ -34,9 +34,9 @@ class User:
     lgbtq: Mapped[Optional[bool]] = mapped_column(default=None)
     url_imagem_perfil: Mapped[Optional[str]] = mapped_column(default=None)
     criado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now())
+        DateTime, default=datetime.utcnow())
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), onupdate=datetime.now()
+        DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow()
     )
 
     def __init__(
@@ -124,6 +124,14 @@ class User:
         'Delivery', back_populates='users'
     )
 
+    events = relationship(
+        'Event', back_populates='gerentes',
+    )
+
+    watchlists = relationship(
+        'Watchlist', back_populates='users'
+    )
+
     @classmethod
     def create(cls, data: Create) -> 'User':
         return cls(
@@ -147,7 +155,7 @@ class User:
     @classmethod
     def model_dump(cls, exclude_unset=False):
         return cls.dict(exclude_unset=exclude_unset)
- 
+
     @classmethod
     def update(cls, instance: 'User', data: Dict):
         for key, value in data.items():
@@ -167,8 +175,7 @@ class User:
         deficiencia_cognitiva: Optional[bool]
         lgbtq: Optional[bool]
         url_imagem_perfil: Optional[str]
-        criado_em: Optional[datetime]
-        atualizado_em: Optional[datetime]
+        atualizado_em: datetime = datetime.utcnow()
 
     class UpdateResponse(BaseModel):
         message: str

@@ -115,7 +115,7 @@ def read_user_by_email(
     return usuario
 
 
-@router.get('/org/{id_organizacao}',
+@router.get('/organization/{id_organizacao}',
             status_code=HTTPStatus.OK,
             response_model=List[User])
 def read_user_by_id_organization(
@@ -124,10 +124,8 @@ def read_user_by_id_organization(
     limit: int = 10,
     db: Session = Depends(get_session)
 ):
-    print(id_organizacao)
     usuarios = db.query(User).filter(
         User.id_organizacao == id_organizacao).offset(skip).limit(limit).all()
-    print(usuarios)
 
     if not usuarios:
         raise HTTPException(

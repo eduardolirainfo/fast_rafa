@@ -1,10 +1,14 @@
 from fastapi import FastAPI
 
+from fast_rafa.routes.calendar import router as calendar_router
 from fast_rafa.routes.category import router as category_router
 from fast_rafa.routes.favorite import router as favorite_router
 from fast_rafa.routes.organization import router as organization_router
 from fast_rafa.routes.post import router as post_router
 from fast_rafa.routes.user import router as user_router
+from fast_rafa.routes.delivery import router as delivery_router
+from fast_rafa.routes.watchlist import router as watchlist_router
+from fast_rafa.routes.event import router as event_router
 
 app = FastAPI(
     title='fast_rafa',
@@ -40,4 +44,29 @@ app.include_router(
     favorite_router,
     prefix='/api/v' + app.version + '/favorites',
     tags=['Favorites']
+)
+
+
+app.include_router(
+    calendar_router,
+    prefix='/api/v' + app.version + '/calendars',
+    tags=['Calendars']
+)
+
+app.include_router(
+    delivery_router,
+    prefix='/api/v' + app.version + '/deliveries',
+    tags=['Deliveries']
+)
+
+app.include_router(
+    watchlist_router,
+    prefix='/api/v' + app.version + '/watchlist',
+    tags=['Watchlist']
+)
+
+app.include_router(
+    event_router,
+    prefix='/api/v' + app.version + '/events',
+    tags=['Events']
 )

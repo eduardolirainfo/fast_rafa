@@ -16,7 +16,8 @@ class MessageIt():
         Integer, ForeignKey('users.id'), nullable=False)
     usuario_dois: Mapped[int] = mapped_column(
         Integer, ForeignKey('users.id'), nullable=False)
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow())
 
     mensagens = relationship(
         'Message',
