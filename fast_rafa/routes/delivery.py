@@ -1,47 +1,122 @@
 import re
+from http import HTTPStatus
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fast_rafa.database import get_session
+from fast_rafa.messages.error_messages import (
+    get_conflict_message,
+    get_creation_error_message,
+    get_deletion_error_message,
+    get_not_found_message,
+    get_success_message,
+    get_unexpected_error_message,
+    get_update_error_message,
+)
 from fast_rafa.models.delivery import Delivery
 from fast_rafa.models.organization import Organization
-from fast_rafa.models.post import Post
 from fast_rafa.models.user import User
 
 router = APIRouter()
 
 
-@router.post("/", response_model=Delivery.Create)
+@router.post(
+    '/', status_code=HTTPStatus.CREATED, response_model=Delivery.CreateDelivery
+)
 def create_delivery(
-    delivery_data: Delivery.Create,
-    db: Session = Depends(get_session)
+    delivery: Delivery.CreateDelivery, db: Session = Depends(get_session)
 ):
+    organization = (
+        db.query(Organization)
+        .filter(Organization.id == delivery.id_organization)
+        .first()
+    )
 
-    postagem = db.query(Post).filter(
-        Post.id == delivery_data.id_postagem).first()
-
-    if not postagem:
-        raise HTTPException(status_code=404, detail="Postagem não encontrada")
-
-    usuario = db.query(User).filter(
-        User.id == delivery_data.id_usuario).first()
-
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    organizacao = db.query(Organization).filter(
-        Organization.id == delivery_data.id_organizacao).first()
-
-    if not organizacao:
+    if not organization:
         raise HTTPException(
-            status_code=404, detail="Organização não encontrada")
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=get_not_found_message('Organização'),
+        )
 
-    delivery = Delivery.create(delivery_data)
+    user = db.query(User).filter(User.id == delivery.id_user).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=get_not_found_message('Usuário'),
+        )
+
+    new_delivery = Delivery.create(delivery)
 
     try:
-        db.add(delivery)
+        db.add(new_delivery)
+        db.commit()
+        db.refresh(new_delivery)
+    except IntegrityError as e:
+        db.rollback()
+        error_message = str(e.orig)
+
+        match = re.search(
+            r'UNIQUE constraint failed: deliveries\.(\w+)', error_message
+        )
+
+        if match:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=get_conflict_message(match.group(1)),
+            )
+        else:
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail=get_creation_error_message('entrega'),
+            )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message('criar a entrega', str(e)),
+        )
+
+    return new_delivery
+
+
+@router.get('/', status_code=HTTPStatus.OK, response_model=List[Delivery])
+def get_deliveries(db: Session = Depends(get_session)):
+    deliveries = db.query(Delivery).all()
+
+    if not deliveries:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=get_not_found_message('Entrega'),
+        )
+    return deliveries
+
+
+@router.put(
+    '/{delivery_id}',
+    status_code=HTTPStatus.OK,
+    response_model=Delivery.UpdateResponseDelivery,
+)
+def update_delivery(
+    delivery_id: int,
+    delivery_data: Delivery.UpdateRequestDelivery,
+    db: Session = Depends(get_session),
+):
+    delivery = db.query(Delivery).filter(Delivery.id == delivery_id).first()
+
+    if not delivery:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=get_not_found_message('Entrega'),
+        )
+
+    try:
+        delivery = Delivery.update(
+            delivery, delivery_data.dict(exclude_unset=True)
+        )
         db.commit()
         db.refresh(delivery)
     except IntegrityError as e:
@@ -49,152 +124,71 @@ def create_delivery(
         error_message = str(e.orig)
 
         match = re.search(
-            r'UNIQUE constraint failed: deliveries\.id', error_message
+            r'UNIQUE constraint failed:  deliveries\.(\w+)', error_message
         )
+
         if match:
             raise HTTPException(
-                status_code=409,
-                detail="Essa entrega já existe."
+                status_code=HTTPStatus.CONFLICT,
+                detail=get_update_error_message('entrega'),
             )
         else:
             raise HTTPException(
-                status_code=500,
-                detail="Erro ao criar a entrega."
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail=get_update_error_message('entrega'),
             )
-
-    return delivery.to_dict()
-
-
-@router.get("/{delivery_id}", response_model=Delivery)
-def get_delivery(
-    delivery_id: int,
-    db: Session = Depends(get_session)
-):
-    delivery = db.query(Delivery).filter(Delivery.id == delivery_id).first()
-    if not delivery:
-        raise HTTPException(status_code=404, detail="Delivery not found")
-    return delivery.to_dict()
-
-
-@router.get('/organization/{org_id}', response_model=list[Delivery])
-def get_deliveries_by_org(
-    org_id: int,
-    db: Session = Depends(get_session)
-):
-    deliveries = db.query(Delivery).filter(
-        Delivery.id_organizacao == org_id).all()
-    if not deliveries:
-        raise HTTPException(status_code=404, detail="Entregas não encontradas")
-    return [delivery.to_dict() for delivery in deliveries]
-
-
-@router.get('/user/{user_id}', response_model=list[Delivery])
-def get_deliveries_by_user(
-    user_id: int,
-    db: Session = Depends(get_session)
-):
-    deliveries = db.query(Delivery).filter(
-        Delivery.id_usuario == user_id).all()
-    if not deliveries:
-        raise HTTPException(status_code=404, detail="Entregas não encontradas")
-    return [delivery.to_dict() for delivery in deliveries]
-
-
-@router.get('/post/{post_id}', response_model=list[Delivery])
-def get_deliveries_by_post(
-    post_id: int,
-    db: Session = Depends(get_session)
-):
-    deliveries = db.query(Delivery).filter(
-        Delivery.id_postagem == post_id).all()
-    if not deliveries:
-        raise HTTPException(status_code=404, detail="Entregas não encontradas")
-    return [delivery.to_dict() for delivery in deliveries]
-
-
-@router.get('/ong/{ong_id}', response_model=list[Delivery])
-def get_deliveries_by_ong(
-    ong_id: int,
-    db: Session = Depends(get_session)
-):
-    deliveries = db.query(Delivery).filter(
-        Delivery.id_ong == ong_id).all()
-    if not deliveries:
-        raise HTTPException(status_code=404, detail="Entregas não encontradas")
-    return [delivery.to_dict() for delivery in deliveries]
-
-
-@router.put(
-    '/{delivery_id}',
-    response_model=Delivery.UpdateResponse
-)
-def update_delivery(
-    delivery_id: int,
-    delivery_data: Delivery.UpdateRequest,
-    db: Session = Depends(get_session)
-):
-    postagem = db.query(Post).filter(
-        Post.id == delivery_data.id_postagem).first()
-
-    if not postagem:
-        raise HTTPException(status_code=404, detail="Postagem não encontrada")
-
-    usuario = db.query(User).filter(
-        User.id == delivery_data.id_usuario).first()
-
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    organizacao = db.query(Organization).filter(
-        Organization.id == delivery_data.id_organizacao).first()
-
-    if not organizacao:
+    except Exception as e:
+        db.rollback()
         raise HTTPException(
-            status_code=404, detail="Organização não encontrada")
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message('atualizar a entrega', str(e)),
+        )
 
-    entrega = db.query(Delivery).filter(Delivery.id == delivery_id).first()
+    return Delivery.UpdateResponseDelivery(
+        message=get_success_message('Entrega atualizada')
+    )
 
-    if not entrega:
-        raise HTTPException(status_code=404, detail="Entrega não encontrada")
 
-    entrega_atualizada = Delivery.update(entrega, delivery_data.dict())
+@router.delete(
+    '/{delivery_id}',
+    status_code=HTTPStatus.OK,
+)
+def delete_delivery(delivery_id: int, db: Session = Depends(get_session)):
+    delivery = db.query(Delivery).filter(Delivery.id == delivery_id).first()
+
+    if not delivery:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=get_not_found_message('Entrega'),
+        )
 
     try:
+        db.delete(delivery)
         db.commit()
-        db.refresh(entrega_atualizada)
     except IntegrityError as e:
         db.rollback()
         error_message = str(e.orig)
 
-        match = re.search(
-            r'UNIQUE constraint failed: deliveries\.id', error_message
-        )
-        if match:
+        if (
+            'foreign key constraint' in error_message.lower()
+            or 'constraint failed' in error_message.lower()
+        ):
             raise HTTPException(
-                status_code=409,
-                detail="Essa entrega já existe."
+                status_code=HTTPStatus.CONFLICT,
+                detail=get_deletion_error_message('entrega'),
             )
         else:
             raise HTTPException(
-                status_code=500,
-                detail="Erro ao criar a entrega."
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail=get_deletion_error_message('entrega'),
             )
-
-    return Delivery.UpdateResponse(
-        message=(
-            'Entrega atualizada com sucesso'
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message('deletar a entrega', str(e)),
         )
+
+    return Delivery.DeleteResponseDelivery(
+        message=get_success_message('Entrega excluída')
     )
-
-
-@router.delete("/deliveries/{id}", response_model=Delivery.DeleteRequest)
-def delete_delivery(
-    id: int,
-    db: Session = Depends(get_session)
-):
-    delivery = db.query(Delivery).filter(Delivery.id == id).first()
-    if not delivery:
-        raise HTTPException(status_code=404, detail="Entrega não encontrada")
-    db.delete(delivery)
-    db.commit()
-    return {"message": "Entrega deletada com sucesso"}

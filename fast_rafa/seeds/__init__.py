@@ -6,12 +6,12 @@ from .categories import seed_categories, undo_categories
 
 
 def seed_all():
-    """ Envie todos os dados iniciais."""
+    """Envie todos os dados iniciais."""
     seed_categories()
     # seed_organizations()
     # seed_users()
     # seed_posts()
-    print("Inclusão de dados iniciais realizada com sucesso!")
+    print('Inclusão de dados iniciais realizada com sucesso!')
 
 
 def undo_all():
@@ -20,4 +20,4 @@ def undo_all():
     # undo_organizations()
     # undo_users()
     # undo_posts()
-    print("Limpeza de dados iniciais realizada com sucesso!")
+    print('Limpeza de dados iniciais realizada com sucesso!')

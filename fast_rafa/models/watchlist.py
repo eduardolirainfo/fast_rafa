@@ -1,31 +1,39 @@
 from datetime import datetime
-from pydantic import BaseModel
-from sqlalchemy import DateTime, ForeignKey, Integer, String, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from fast_rafa.models.base import table_registry
 from typing import Dict, Optional
+
+from pydantic import BaseModel
+from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from fast_rafa.models.base import table_registry
 
 
 @table_registry.mapped_as_dataclass
-class Watchlist():
+class Watchlist:
     __tablename__ = 'watchlists'
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
     id_organizacao: Mapped[Optional[int]] = mapped_column(
-        Integer, ForeignKey('organizations.id'), nullable=True)
+        Integer, ForeignKey('organizations.id'), nullable=True
+    )
     id_usuario: Mapped[Optional[int]] = mapped_column(
-        Integer, ForeignKey('users.id'), nullable=True)
+        Integer, ForeignKey('users.id'), nullable=True
+    )
     endereco_ip: Mapped[str] = mapped_column(String, nullable=False)
     quantidade: Mapped[int] = mapped_column(Integer, nullable=False)
     criado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow())
+        DateTime, default=datetime.utcnow()
+    )
 
-    def __init__(self,
-                 id_organizacao: Optional[int] = None,
-                 id_usuario: Optional[int] = None,
-                 endereco_ip: str = '',
-                 quantidade: int = 0
-                 ):
+    def __init__(
+        self,
+        id_organizacao: Optional[int] = None,
+        id_usuario: Optional[int] = None,
+        endereco_ip: str = '',
+        quantidade: int = 0,
+    ):
         self.id_organizacao = id_organizacao
         self.id_usuario = id_usuario
         self.endereco_ip = endereco_ip
@@ -38,7 +46,7 @@ class Watchlist():
             'id_usuario': self.id_usuario,
             'endereco_ip': self.endereco_ip,
             'quantidade': self.quantidade,
-            'criado_em': self.criado_em.isoformat()
+            'criado_em': self.criado_em.isoformat(),
         }
 
     class Create(BaseModel):
@@ -55,7 +63,7 @@ class Watchlist():
             id_usuario=data.id_usuario,
             endereco_ip=data.endereco_ip,
             quantidade=data.quantidade,
-            criado_em=data.criado_em
+            criado_em=data.criado_em,
         )
 
     @classmethod
@@ -70,7 +78,7 @@ class Watchlist():
         return watchlist
 
     organizations = relationship('Organization', back_populates='watchlists')
-    users = relationship('User', back_populates='watchlists')
+    user = relationship('User', back_populates='watchlist')
 
     class UpdateRequest(BaseModel):
         id_organizacao: Optional[int]

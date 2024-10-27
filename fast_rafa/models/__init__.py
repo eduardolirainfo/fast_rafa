@@ -5,3 +5,7 @@ from .post import Post  # noqa
 from .favorite import Favorite  # noqa
 from .delivery import Delivery  # noqa
 from .calendar import Calendar  # noqa
+from .event import Event  # noqa
+from .watchlist import Watchlist  # noqa
+from .message import Message  # noqa
+from .message_it import MessageItem  # noqa

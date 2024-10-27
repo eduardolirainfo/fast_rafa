@@ -1,4 +1,3 @@
-
 import re
 from http import HTTPStatus
 from typing import List
@@ -8,6 +7,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fast_rafa.database import get_session
+from fast_rafa.messages.error_messages import (
+    get_conflict_message,
+    get_creation_error_message,
+    get_deletion_error_message,
+    get_not_found_message,
+    get_success_message,
+    get_unexpected_error_message,
+    get_update_error_message,
+)
 from fast_rafa.models.category import Category
 
 router = APIRouter()
@@ -15,8 +23,7 @@ router = APIRouter()
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=Category)
 def create_category(
-    categoria: Category.Create,
-    db: Session = Depends(get_session)
+    categoria: Category.Create, db: Session = Depends(get_session)
 ):
     nova_categoria = Category.create(categoria)
 
@@ -29,96 +36,96 @@ def create_category(
         error_message = str(e.orig)
 
         match = re.search(
-            r'UNIQUE constraint failed: categories\.categoria', error_message
+            r'UNIQUE constraint failed:  categories\.categoria', error_message
         )
         if match:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail="Essa categoria já existe."
+                detail=get_conflict_message('categoria'),
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail="Erro ao criar a categoria."
+                detail=get_creation_error_message('categoria'),
             )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message('criar a categoria', str(e)),
+        )
 
     return nova_categoria
 
 
-@router.get('/', status_code=HTTPStatus.OK,
-            response_model=list[Category])
+@router.get('/', status_code=HTTPStatus.OK, response_model=list[Category])
 def read_categories(
-    skip: int = 0,
-    limit: int = 10,
-    db: Session = Depends(get_session)
+    skip: int = 0, limit: int = 10, db: Session = Depends(get_session)
 ):
-    todas_categorias = db.query(
-        Category).offset(skip).limit(limit).all()
+    todas_categorias = db.query(Category).offset(skip).limit(limit).all()
 
     if not todas_categorias:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Nenhuma categoria encontrada'
+            detail=get_not_found_message('Categoria'),
         )
 
     return todas_categorias
 
 
-@router.get(
-    '/{category_id}', status_code=HTTPStatus.OK
-)
+@router.get('/{category_id}', status_code=HTTPStatus.OK)
 def read_category_by_id(category_id: int, db: Session = Depends(get_session)):
-    categoria_db = db.query(Category).filter(
-        Category.id == category_id).first()
+    categoria_db = (
+        db.query(Category).filter(Category.id == category_id).first()
+    )
 
     if not categoria_db:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Categoria não encontrada'
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=get_not_found_message('Categoria'),
         )
 
     return categoria_db.to_dict()
 
 
-@router.get('/name/{category_name}',
-            status_code=HTTPStatus.OK,
-            response_model=List[Category])
+@router.get(
+    '/name/{category_name}',
+    status_code=HTTPStatus.OK,
+    response_model=List[Category],
+)
 def read_category_by_name(
-    category_name: str,
-    db: Session = Depends(get_session)
+    category_name: str, db: Session = Depends(get_session)
 ):
-    categorias = db.query(Category).filter(
-        Category.categoria.ilike(f'%{category_name}%')
-    ).all()
+    categorias = (
+        db.query(Category)
+        .filter(Category.categoria.ilike(f'%{category_name}%'))
+        .all()
+    )
 
     if not categorias:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Nenhuma categoria encontrada'
+            detail=get_not_found_message('Categoria'),
         )
 
     return categorias
 
 
-@router.put("/{category_id}",
-            response_model=Category.UpdateResponse)
+@router.put('/{category_id}', response_model=Category.UpdateResponse)
 def update_category(
     category_id: int,
     category_data: Category.UpdateRequest,
-    db: Session = Depends(get_session)
+    db: Session = Depends(get_session),
 ):
     categoria = db.query(Category).filter(Category.id == category_id).first()
 
     if categoria is None:
-        raise HTTPException(status_code=404, detail="Categoria não encontrada")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=get_not_found_message('Categoria'),
+        )
 
-    nome_categoria_original = categoria.categoria.strip()
-    # nome_categoria_novo = category_data.categoria.strip()
-
-    # if nome_categoria_original == nome_categoria_novo:
-    #     raise HTTPException(
-    #         status_code=HTTPStatus.BAD_REQUEST,
-    #         detail="O nome da categoria não pode ser o mesmo."
-    #     )
+    # nome_categoria_original = categoria.categoria.strip()
 
     categoria_atualizada = Category.update(categoria, category_data.dict())
 
@@ -135,34 +142,36 @@ def update_category(
         if match:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail="Essa categoria já existe."
+                detail=get_conflict_message('categoria'),
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail="Erro ao criar a categoria."
+                detail=get_update_error_message('categoria'),
             )
 
-    return Category.UpdateResponse(
-        message=(
-            f'A categoria "{nome_categoria_original}" foi atualizada para '
-            f'"{categoria_atualizada.categoria}".'
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message(
+                'atualizar a categoria', str(e)
+            ),
         )
+
+    return Category.UpdateResponse(
+        message=get_success_message('Categoria atualizada')
     )
 
 
-@router.delete('/{category_id}',
-               response_model=Category.DeleteResponse)
-def delete_category(
-    category_id: int,
-    db: Session = Depends(get_session)
-):
+@router.delete('/{category_id}', response_model=Category.DeleteResponse)
+def delete_category(category_id: int, db: Session = Depends(get_session)):
     category = db.query(Category).filter(Category.id == category_id).first()
 
     if not category:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Categoria não encontrada'
+            detail=get_not_found_message('Categoria não encontrada'),
         )
 
     try:
@@ -172,23 +181,27 @@ def delete_category(
         db.rollback()
         error_message = str(e.orig)
 
-        if ('foreign key constraint' in error_message.lower() or
-                'constraint failed' in error_message.lower()):
+        if (
+            'foreign key constraint' in error_message.lower()
+            or 'constraint failed' in error_message.lower()
+        ):
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail=(
-                    "Não é possível excluir essa categoria, "
-                    "pois ela está associada a uma postagem."
-                ),
+                detail=get_conflict_message('categoria'),
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail='Erro ao deletar a categoria.'
+                detail=get_deletion_error_message('categoria'),
             )
-    return Category.DeleteResponse(
-        message=(
-            f'A categoria "{category.categoria}" '
-            'foi deletada com sucesso.'
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message('excluir a categoria', str(e)),
         )
+
+    return Category.DeleteResponse(
+        message=get_success_message('Categoria excluída')
     )

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Dict, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import DateTime, Integer, String, func
+from sqlalchemy import DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fast_rafa.models.base import table_registry
@@ -12,45 +12,51 @@ from fast_rafa.models.base import table_registry
 class Category:
     __tablename__ = 'categories'
 
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
     categoria: Mapped[str] = mapped_column(
-        String(25), nullable=False, unique=True)
+        String(25), nullable=False, unique=True
+    )
     criado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow())
+        DateTime, default=datetime.utcnow
+    )
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow()
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    def __init__(self, categoria: str,
-                 id: Optional[int] = None,
-                 criado_em=None, atualizado_em=None):
+    def __init__(
+        self,
+        categoria: str,
+        criado_em: Optional[datetime] = None,
+        atualizado_em: Optional[datetime] = None,
+    ):
         self.categoria = categoria
-        self.id = id
-        self.criado_em = criado_em
-        self.atualizado_em = atualizado_em
+        self.criado_em = criado_em or datetime.utcnow()
+        self.atualizado_em = atualizado_em or datetime.utcnow()
 
     def to_dict(self) -> Dict[str, Optional[str]]:
         return {
-            "id": self.id,
-            "categoria": self.categoria,
-            "criado_em": self.criado_em.isoformat(),
-            "atualizado_em": self.atualizado_em.isoformat()
-            if self.atualizado_em else None
+            'categoria': self.categoria,
+            'criado_em': self.criado_em.isoformat(),
+            'atualizado_em': self.atualizado_em.isoformat()
+            if self.atualizado_em
+            else None,
         }
 
     posts = relationship('Post', back_populates='categories')
 
     class Create(BaseModel):
         categoria: str
-        created_at: datetime = datetime.utcnow()
-        updated_at: datetime = datetime.utcnow()
+        criado_em: Optional[datetime] = None
+        atualizado_em: Optional[datetime] = None
 
     @classmethod
     def create(cls, data: Create) -> 'Category':
         return cls(
             categoria=data.categoria,
-            criado_em=data.created_at,
-            atualizado_em=data.updated_at
+            criado_em=data.criado_em or datetime.utcnow(),
+            atualizado_em=data.atualizado_em or datetime.utcnow(),
         )
 
     @classmethod

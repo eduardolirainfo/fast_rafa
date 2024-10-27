@@ -7,13 +7,9 @@ from fast_rafa.models.category import Category
 
 
 def seed_categories(session: Session = Depends(get_session)):
-    laticinios = Category(
-        categoria='Laticínios'
-    )
+    laticinios = Category(categoria='Laticínios')
     db_lat = session.scalar(
-        select(Category).where(
-            (Category.categoria == 'Laticínios')
-        )
+        select(Category).where((Category.categoria == 'Laticínios'))
     )
 
     if db_lat is None:
@@ -21,13 +17,9 @@ def seed_categories(session: Session = Depends(get_session)):
         session.commit()
         session.refresh(db_lat)
 
-    vegetais = Category(
-        categoria='Vegetais'
-    )
+    vegetais = Category(categoria='Vegetais')
     db_veg = session.scalar(
-        select(Category).where(
-            (Category.categoria == 'Vegetais')
-        )
+        select(Category).where((Category.categoria == 'Vegetais'))
     )
 
     if db_veg is None:
@@ -35,14 +27,10 @@ def seed_categories(session: Session = Depends(get_session)):
         session.commit()
         session.refresh(db_veg)
 
-    frutas = Category(
-        categoria='Frutas'
-    )
+    frutas = Category(categoria='Frutas')
 
     db_fru = session.scalar(
-        select(Category).where(
-            (Category.categoria == 'Frutas')
-        )
+        select(Category).where((Category.categoria == 'Frutas'))
     )
 
     if db_fru is None:
@@ -50,14 +38,10 @@ def seed_categories(session: Session = Depends(get_session)):
         session.commit()
         session.refresh(db_fru)
 
-    graos = Category(
-        categoria='Grãos'
-    )
+    graos = Category(categoria='Grãos')
 
     db_gra = session.scalar(
-        select(Category).where(
-            (Category.categoria == 'Grãos')
-        )
+        select(Category).where((Category.categoria == 'Grãos'))
     )
 
     if db_gra is None:
@@ -65,14 +49,10 @@ def seed_categories(session: Session = Depends(get_session)):
         session.commit()
         session.refresh(db_gra)
 
-    proteinas = Category(
-        categoria='Proteínas'
-    )
+    proteinas = Category(categoria='Proteínas')
 
     db_pro = session.scalar(
-        select(Category).where(
-            (Category.categoria == 'Proteínas')
-        )
+        select(Category).where((Category.categoria == 'Proteínas'))
     )
 
     if db_pro is None:
