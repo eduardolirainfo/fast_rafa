@@ -21,9 +21,13 @@ from fast_rafa.models.category import Category
 router = APIRouter()
 
 
-@router.post('/', status_code=HTTPStatus.CREATED, response_model=Category)
+@router.post(
+    '/',
+    status_code=HTTPStatus.CREATED,
+    response_model=dict)
 def create_category(
-    categoria: Category.Create, db: Session = Depends(get_session)
+    categoria: Category.CreateCategory,
+    db: Session = Depends(get_session)
 ):
     nova_categoria = Category.create(categoria)
 
@@ -36,7 +40,7 @@ def create_category(
         error_message = str(e.orig)
 
         match = re.search(
-            r'UNIQUE constraint failed:  categories\.categoria', error_message
+            r'UNIQUE constraint failed: categories\.(\w+)', error_message
         )
         if match:
             raise HTTPException(
@@ -55,7 +59,7 @@ def create_category(
             detail=get_unexpected_error_message('criar a categoria', str(e)),
         )
 
-    return nova_categoria
+    return nova_categoria.to_dict()
 
 
 @router.get('/', status_code=HTTPStatus.OK, response_model=list[Category])
@@ -137,7 +141,7 @@ def update_category(
         error_message = str(e.orig)
 
         match = re.search(
-            r'UNIQUE constraint failed: categories\.categoria', error_message
+            r'UNIQUE constraint failed: categories\.(\w+)', error_message
         )
         if match:
             raise HTTPException(

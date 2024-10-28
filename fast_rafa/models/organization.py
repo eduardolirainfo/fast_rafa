@@ -172,5 +172,3 @@ class Organization:
 
     class DeleteResponseOrganization(BaseModel):
         message: str
-        
-    

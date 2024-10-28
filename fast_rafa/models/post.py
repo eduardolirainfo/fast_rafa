@@ -1,8 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Dict, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
+from sqlalchemy import (
+    Boolean, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fast_rafa.models.base import table_registry
@@ -29,8 +31,8 @@ class Post:
     url_imagem_post: Mapped[Optional[str]] = mapped_column(
         String(2048), nullable=True
     )
-    data_validade: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.utcnow()
+    data_validade: Mapped[date] = mapped_column(
+        Date, nullable=False, default=lambda: datetime.utcnow().date()
     )
     status: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     criado_em: Mapped[datetime] = mapped_column(
@@ -38,6 +40,11 @@ class Post:
     )
     atualizado_em: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow()
+    )
+
+    __table_args__ = (
+        UniqueConstraint('id_usuario', 'titulo', 'descricao', 'data_validade',
+                         name='uix_usuario_titulo_descricao_data'),
     )
 
     def __init__(self, post_data: 'CreatePostRequest'):

@@ -5,7 +5,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-
+from sqlalchemy import select
 from fast_rafa.database import get_session
 from fast_rafa.models.favorite import Favorite
 from fast_rafa.models.organization import Organization
@@ -14,8 +14,12 @@ from fast_rafa.models.user import User
 router = APIRouter()
 
 
-@router.post('/', status_code=HTTPStatus.CREATED, response_model=dict)
-def create_user(usuario: User.Create, db: Session = Depends(get_session)):
+@router.post(
+    '/',
+    status_code=HTTPStatus.CREATED,
+    response_model=dict
+)
+def create_user(usuario: User.CreateUser, db: Session = Depends(get_session)):
     organizacao = (
         db.query(Organization)
         .filter(Organization.id == usuario.id_organizacao)
@@ -71,7 +75,8 @@ def read_users(
 
 @router.get('/{user_id}', status_code=HTTPStatus.OK, response_model=dict)
 def read_user_by_id(user_id: int, db: Session = Depends(get_session)):
-    usuario = db.query(User).filter(User.id == user_id).first()
+
+    usuario = db.scalar(select(User).filter(User.id == user_id))
 
     if not usuario:
         raise HTTPException(
@@ -89,7 +94,7 @@ def read_user_by_id(user_id: int, db: Session = Depends(get_session)):
     '/mail/{user_email}', status_code=HTTPStatus.OK, response_model=dict
 )
 def read_dict_by_email(user_email: str, db: Session = Depends(get_session)):
-    usuario = db.query(User).filter(User.email == user_email).first()
+    usuario = db.scalar(select(User).filter(User.email == user_email))
 
     if not usuario:
         raise HTTPException(
@@ -140,9 +145,8 @@ def update_user(
     db: Session = Depends(get_session),
 ):
     organization = (
-        db.query(Organization)
-        .filter(Organization.id == user_data.id_organizacao)
-        .first()
+        db.scalar(select(Organization).filter(
+            Organization.id == user_data.id_organizacao))
     )
 
     if not organization:
@@ -151,7 +155,7 @@ def update_user(
             detail='Organização não encontrada',
         )
 
-    usuario = db.query(User).filter(User.id == user_id).first()
+    usuario = db.scalar(select(User).filter(User.id == user_id))
 
     if not usuario:
         raise HTTPException(
@@ -192,7 +196,7 @@ def update_user(
     response_model=User.DeleteResponse,
 )
 def delete_user(user_id: int, db: Session = Depends(get_session)):
-    usuario = db.query(User).filter(User.id == user_id).first()
+    usuario = db.scalar(select(User).filter(User.id == user_id))
 
     if not usuario:
         raise HTTPException(

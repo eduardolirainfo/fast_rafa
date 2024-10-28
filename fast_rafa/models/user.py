@@ -58,35 +58,10 @@ class User:
         'Message', back_populates='sender', cascade='all, delete-orphan'
     )
 
-    class CreateUserRequest(BaseModel):
-        primeiro_nome: constr(max_length=50)
-        sobrenome: constr(max_length=50)
-        email: str
-        senha_hash: constr(max_length=255)
-        telefone: constr(max_length=20)
-        id_organizacao: Optional[int] = None
-        eh_voluntario: bool = False
-        eh_gerente: bool = False
-        deficiencia_auditiva: Optional[bool] = None
-        usa_cadeira_rodas: Optional[bool] = None
-        deficiencia_cognitiva: Optional[bool] = None
-        lgbtq: Optional[bool] = None
-        url_imagem_perfil: Optional[str] = None
-
-    def __init__(self, user_data: CreateUserRequest):
-        self.primeiro_nome = user_data.primeiro_nome
-        self.sobrenome = user_data.sobrenome
-        self.email = user_data.email
-        self.senha_hash = user_data.senha_hash
-        self.telefone = user_data.telefone
-        self.id_organizacao = user_data.id_organizacao
-        self.eh_voluntario = user_data.eh_voluntario
-        self.eh_gerente = user_data.eh_gerente
-        self.deficiencia_auditiva = user_data.deficiencia_auditiva
-        self.usa_cadeira_rodas = user_data.usa_cadeira_rodas
-        self.deficiencia_cognitiva = user_data.deficiencia_cognitiva
-        self.lgbtq = user_data.lgbtq
-        self.url_imagem_perfil = user_data.url_imagem_perfil
+    def __init__(self, data: 'CreateUser'):
+        for key, value in data.dict().items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     def to_dict(self):
         return {
@@ -129,38 +104,9 @@ class User:
             'criado_em': self.criado_em,
         }
 
-    class Create(BaseModel):
-        primeiro_nome: constr(max_length=50)
-        sobrenome: constr(max_length=50)
-        email: str
-        senha_hash: constr(max_length=255)
-        telefone: constr(max_length=20)
-        id_organizacao: Optional[int] = None
-        eh_voluntario: bool = False
-        eh_gerente: bool = False
-        deficiencia_auditiva: Optional[bool] = None
-        usa_cadeira_rodas: Optional[bool] = None
-        deficiencia_cognitiva: Optional[bool] = None
-        lgbtq: Optional[bool] = None
-        url_imagem_perfil: Optional[str] = None
-
     @classmethod
-    def create(cls, data: Create) -> 'User':
-        return cls(
-            primeiro_nome=data.primeiro_nome,
-            sobrenome=data.sobrenome,
-            email=data.email,
-            senha_hash=data.senha_hash,
-            telefone=data.telefone,
-            id_organizacao=data.id_organizacao,
-            eh_voluntario=data.eh_voluntario,
-            eh_gerente=data.eh_gerente,
-            deficiencia_auditiva=data.deficiencia_auditiva,
-            usa_cadeira_rodas=data.usa_cadeira_rodas,
-            deficiencia_cognitiva=data.deficiencia_cognitiva,
-            lgbtq=data.lgbtq,
-            url_imagem_perfil=data.url_imagem_perfil,
-        )
+    def create(cls, data: 'CreateUser'):
+        return cls(data)
 
     @classmethod
     def update(cls, instance: 'User', data: Dict):
@@ -168,6 +114,21 @@ class User:
             setattr(instance, key, value)
         instance.atualizado_em = datetime.utcnow()
         return instance
+
+    class CreateUser(BaseModel):
+        id_organizacao: int
+        eh_voluntario: bool = False
+        eh_gerente: bool = False
+        primeiro_nome: constr(max_length=50)
+        sobrenome: constr(max_length=50)
+        email: str
+        senha_hash: constr(max_length=255)
+        telefone: constr(max_length=20)
+        deficiencia_auditiva: Optional[bool] = None
+        usa_cadeira_rodas: Optional[bool] = None
+        deficiencia_cognitiva: Optional[bool] = None
+        lgbtq: Optional[bool] = None
+        url_imagem_perfil: Optional[str] = None
 
     class UpdateRequest(BaseModel):
         id_organizacao: Optional[int] = None

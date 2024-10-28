@@ -2,7 +2,7 @@
 
 # Mensagens gerais
 NOT_FOUND_DETAIL = '{} não encontrado!'
-CONFLICT_DETAIL = 'Já existe um(a) {} com esses dados.'
+CONFLICT_DETAIL = 'Já existe um campo {} com esses dados.'
 CREATION_ERROR_DETAIL = 'Erro ao criar {}.'
 UPDATE_ERROR_DETAIL = 'Erro ao atualizar {}.'
 DELETION_ERROR_DETAIL = 'Erro ao excluir {}.'

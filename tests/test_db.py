@@ -1,6 +1,7 @@
 from sqlalchemy import select
 
 from fast_rafa.models.organization import Organization as OrganizationModel
+from fast_rafa.models.user import User
 
 
 def test_create_organization(session):
@@ -141,8 +142,9 @@ def test_delete_organization(session):
     session.commit()
     session.refresh(organization)
 
-    assert organization.id is not None, \
-        "ID da organização deve ser definido após a criação."
+    assert (
+        organization.id is not None
+    ), 'ID da organização deve ser definido após a criação.'
 
     session.delete(organization)
     session.commit()
@@ -155,10 +157,59 @@ def test_delete_organization(session):
 
     if deleted_organization is None:
         delete_response = OrganizationModel.DeleteResponseOrganization(
-            message="Organização excluída")
+            message='Organização excluída'
+        )
     else:
         delete_response = OrganizationModel.DeleteResponseOrganization(
-            message="Falha ao excluir a organização")
+            message='Falha ao excluir a organização'
+        )
 
-    assert delete_response.message == "Organização excluída", \
-        "Mensagem de sucesso não corresponde ao esperado."
+    assert (
+        delete_response.message == 'Organização excluída'
+    ), 'Mensagem de sucesso não corresponde ao esperado.'
+
+
+def test_get_users(session):
+    data = {
+        'id_organizacao': 1,
+        'eh_voluntario': True,
+        'eh_gerente': True,
+        'primeiro_nome': 'Eduardo',
+        'sobrenome': 'Lira',
+        'email': 'eduardolirainfo@gmail.com',
+        'senha_hash': '123456',
+        'telefone': '(11) 99999-9999',
+        'deficiencia_auditiva': True,
+        'usa_cadeira_rodas': True,
+        'deficiencia_cognitiva': True,
+        'lgbtq': True,
+        'url_imagem_perfil': 'https://example.com/image.jpg',
+    }
+
+    user_data = User.CreateUser(**data)
+    user = User.create(user_data)
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    assert (
+        user.id is not None
+    ), 'ID do usuário deve ser definido após a criação.'
+
+    users = OrganizationModel.get_users(session, user.id)
+
+    assert (
+        len(users) == 1
+    ), 'Deve retornar uma lista com um usuário.'
+    assert users[0].id == user.id
+    assert users[0].id_organizacao == user.id_organizacao
+    assert users[0].eh_voluntario == user.eh_voluntario
+    assert users[0].eh_gerente == user.eh_gerente
+    assert users[0].primeiro_nome == user.primeiro_nome
+    assert users[0].sobrenome == user.sobrenome
+    assert users[0].email == user.email
+    assert users[0].telefone == user.telefone
+    assert users[0].url_imagem_perfil == user.url_imagem_perfil
+    assert users[0].criado_em == user.criado_em
+

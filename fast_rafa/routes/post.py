@@ -11,6 +11,15 @@ from fast_rafa.models.category import Category
 from fast_rafa.models.organization import Organization
 from fast_rafa.models.post import Post
 from fast_rafa.models.user import User
+from fast_rafa.messages.error_messages import (
+    get_not_found_message,
+    get_conflict_message,
+    get_creation_error_message,
+    get_success_message,
+    get_update_error_message,
+    get_deletion_error_message,
+    get_unexpected_error_message,
+)
 
 router = APIRouter()
 
@@ -26,7 +35,7 @@ def create_post(
     if not categoria:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='Categoria não encontrada',
+            detail=get_not_found_message('Categoria'),
         )
 
     organizacao = (
@@ -38,7 +47,7 @@ def create_post(
     if not organizacao:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='Organização não encontrada',
+            detail=get_not_found_message('Organização'),
         )
 
     usuario = db.query(User).filter(User.id == post.id_usuario).all()
@@ -46,7 +55,7 @@ def create_post(
     if not usuario:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='Usuário não encontrado',
+            detail=get_not_found_message('Usuário'),
         )
     nova_postagem = Post.create(post)
 
@@ -65,13 +74,21 @@ def create_post(
             field_name = match.group(1).replace('_', ' ').capitalize()
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail=f'Já existe um post com este(a) {field_name}.',
+                detail=get_conflict_message(field_name),
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail='Erro ao criar o post.',
+                detail=get_creation_error_message('post'),
             )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message(
+                'criar a postagem', str(e)
+            ),
+        )
 
     return nova_postagem
 
@@ -85,7 +102,7 @@ def read_posts(
     if not postagens:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Nenhuma postagem encontrada',
+            detail=get_not_found_message('Postagem'),
         )
 
     return postagens
@@ -98,7 +115,7 @@ def read_post_by_id(post_id: int, db: Session = Depends(get_session)):
     if not postagem:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Postagem não encontrada',
+            detail=get_not_found_message('Postagem'),
         )
 
     return postagem
@@ -121,7 +138,7 @@ def read_post_by_name(post_name: str, db: Session = Depends(get_session)):
     if not postagens:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Nenhuma postagem encontrada',
+            detail=get_not_found_message('Postagem'),
         )
 
     return postagens
@@ -136,7 +153,7 @@ def update_post(
     if not postagem:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Postagem não encontrada',
+            detail=get_not_found_message('Postagem'),
         )
 
     categoria = (
@@ -146,7 +163,7 @@ def update_post(
     if not categoria:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='Categoria não encontrada',
+            detail=get_not_found_message('Categoria'),
         )
 
     organizacao = (
@@ -158,7 +175,7 @@ def update_post(
     if not organizacao:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='Organização não encontrada',
+            detail=get_not_found_message('Organização'),
         )
 
     usuario = db.query(User).filter(User.id == post.id_usuario).all()
@@ -166,7 +183,7 @@ def update_post(
     if not usuario:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='Usuário não encontrado',
+            detail=get_not_found_message('Usuário'),
         )
 
     post_atualizado = Post.update(postagem, post.dict())
@@ -185,14 +202,21 @@ def update_post(
             field_name = match.group(1).replace('_', ' ').capitalize()
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail=f'Já existe um post com este(a) {field_name}.',
+                detail=get_conflict_message(field_name),
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail='Erro ao atualizar o post.',
+                detail=get_update_error_message('post'),
             )
-
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message(
+                'atualizar a postagem', str(e)
+            ),
+        )
     return post_atualizado
 
 
@@ -207,7 +231,7 @@ def delete_post(post_id: int, db: Session = Depends(get_session)):
     if not postagem:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Postagem não encontrada',
+            detail=get_not_found_message('Postagem'),
         )
 
     try:
@@ -223,16 +247,21 @@ def delete_post(post_id: int, db: Session = Depends(get_session)):
         ):
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail=(
-                    'Não é possível excluir esse post, '
-                    'pois ele está associada a outros registros.'
-                ),
+                detail=get_conflict_message('postagem'),
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail='Erro ao deletar post.',
+                detail=get_deletion_error_message('postagem'),
             )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=get_unexpected_error_message(
+                'deletar a postagem', str(e)
+            ),
+        )
     return Post.DeleteResponse(
-        message=f'O post "{postagem.titulo}" foi deletado com sucesso.'
+        message=get_success_message('Postagem deletada')
     )

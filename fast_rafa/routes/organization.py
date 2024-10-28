@@ -242,4 +242,3 @@ def delete_organization(
     return Organization.DeleteResponseOrganization(
         message=get_success_message('Organização excluída')
     )
-
