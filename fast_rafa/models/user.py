@@ -18,6 +18,7 @@ class User:
     primeiro_nome: Mapped[constr(max_length=50)]
     sobrenome: Mapped[constr(max_length=50)]
     email: Mapped[str] = mapped_column(unique=True)
+    username: Mapped[str] = mapped_column(unique=True)
     senha_hash: Mapped[constr(max_length=255)]
     telefone: Mapped[constr(max_length=20)]
     id_organizacao: Mapped[int] = mapped_column(
@@ -122,6 +123,7 @@ class User:
         primeiro_nome: constr(max_length=50)
         sobrenome: constr(max_length=50)
         email: str
+        username: str
         senha_hash: constr(max_length=255)
         telefone: constr(max_length=20)
         deficiencia_auditiva: Optional[bool] = None
@@ -137,6 +139,7 @@ class User:
         primeiro_nome: Optional[constr(max_length=50)] = None
         sobrenome: Optional[constr(max_length=50)] = None
         email: Optional[str] = None
+        username: Optional[str] = None
         senha_hash: Optional[constr(max_length=255)] = None
         telefone: Optional[constr(max_length=20)] = None
         deficiencia_auditiva: Optional[bool] = None

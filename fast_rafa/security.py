@@ -1,21 +1,20 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from pwdlib import PasswordHash
+from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-
 from fast_rafa.database import get_session
-from fast_rafa.models.user import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
+pwd_context = PasswordHash.recommended()
+
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_session)
-) -> User:
-    user = db.query(User).filter(User.senha_hash == token).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Usuário não autorizado.',
-            headers={'WWW-Authenticate': 'Bearer'},
-        )
-    return user
+    db: Session = Depends(get_session)
+):
+    pass

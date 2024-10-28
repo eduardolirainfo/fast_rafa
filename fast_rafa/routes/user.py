@@ -10,6 +10,16 @@ from fast_rafa.database import get_session
 from fast_rafa.models.favorite import Favorite
 from fast_rafa.models.organization import Organization
 from fast_rafa.models.user import User
+from fast_rafa.messages.error_messages import (
+    get_not_found_message,
+    get_conflict_message,
+    get_creation_error_message,
+    get_success_message,
+    get_update_error_message,
+    get_deletion_error_message,
+    get_unexpected_error_message,
+)
+from fast_rafa.security import get_password_hash
 
 router = APIRouter()
 
@@ -19,7 +29,10 @@ router = APIRouter()
     status_code=HTTPStatus.CREATED,
     response_model=dict
 )
-def create_user(usuario: User.CreateUser, db: Session = Depends(get_session)):
+def create_user(
+    usuario: User.CreateUser,
+    db: Session = Depends(get_session)
+):
     organizacao = (
         db.query(Organization)
         .filter(Organization.id == usuario.id_organizacao)
@@ -29,10 +42,13 @@ def create_user(usuario: User.CreateUser, db: Session = Depends(get_session)):
     if not organizacao:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='Organização não encontrada',
+            detail=get_not_found_message('Organização'),
         )
 
-    novo_usuario = User.create(usuario)
+    senha_hash = get_password_hash(usuario.senha_hash)
+    novo_usuario_data = usuario.dict()
+    novo_usuario_data["senha_hash"] = senha_hash
+    novo_usuario = User.create(User.CreateUser(**novo_usuario_data))
     try:
         db.add(novo_usuario)
         db.commit()
@@ -48,12 +64,12 @@ def create_user(usuario: User.CreateUser, db: Session = Depends(get_session)):
             field_name = match.group(1).replace('_', ' ').capitalize()
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail=f'Já existe um usuário com este(a) {field_name}.',
+                detail=get_conflict_message(field_name),
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail='Erro ao criar o usuário.',
+                detail=get_creation_error_message('usuário'),
             )
 
     return novo_usuario.profile_dict()
@@ -68,7 +84,7 @@ def read_users(
     if not usuarios:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Nenhum usuário encontrado!',
+            detail=get_not_found_message('Nenhum usuário'),
         )
     return [usuario.profile_dict() for usuario in usuarios]
 
@@ -81,7 +97,7 @@ def read_user_by_id(user_id: int, db: Session = Depends(get_session)):
     if not usuario:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Usuário não encontrado!',
+            detail=get_not_found_message('Usuário'),
         )
     else:
         usuario.favoritos = (
@@ -99,7 +115,7 @@ def read_dict_by_email(user_email: str, db: Session = Depends(get_session)):
     if not usuario:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Usuário não encontrado!',
+            detail=get_not_found_message('Usuário'),
         )
     else:
         usuario.favoritos = (
@@ -130,7 +146,7 @@ def read_user_by_id_organization(
     if not usuarios:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Usuários não encontrados!',
+            detail=get_not_found_message('Nenhum usuário'),
         )
 
     return [usuario.home_dict() for usuario in usuarios]
@@ -152,7 +168,7 @@ def update_user(
     if not organization:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='Organização não encontrada',
+            detail=get_not_found_message('Organização'),
         )
 
     usuario = db.scalar(select(User).filter(User.id == user_id))
@@ -160,10 +176,17 @@ def update_user(
     if not usuario:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Usuário não encontrado!',
+            detail=get_not_found_message('Usuário'),
         )
 
-    usuario = User.update(usuario, user_data.dict())
+    update_data = user_data.dict()
+
+    if "senha_hash" in update_data and update_data["senha_hash"]:
+        update_data["senha_hash"] = get_password_hash(
+            update_data.pop("senha_hash")
+            )
+
+    usuario = User.update(usuario, update_data)
 
     try:
         db.commit()
@@ -179,15 +202,17 @@ def update_user(
             field_name = match.group(1).replace('_', ' ').capitalize()
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail=f'Já existe um usuário com este(a) {field_name}.',
+                detail=get_conflict_message(field_name),
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail='Erro ao atualizar o usuário.',
+                detail=get_update_error_message('usuário'),
             )
 
-    return User.UpdateResponse(message='Usuário atualizado com sucesso.')
+    return User.UpdateResponse(
+        message=get_success_message('Usuário atualizado'),
+    )
 
 
 @router.delete(
@@ -201,7 +226,7 @@ def delete_user(user_id: int, db: Session = Depends(get_session)):
     if not usuario:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Usuário não encontrado!',
+            detail=get_not_found_message('Usuário'),
         )
 
     try:
@@ -217,21 +242,20 @@ def delete_user(user_id: int, db: Session = Depends(get_session)):
         ):
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail=(
-                    'Não é possível excluir o usuário, '
-                    'pois está associado a outros registros.'
-                ),
+                detail=get_deletion_error_message('usuário')
             )
         else:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail='Erro ao excluir o usuário.',
+                detail=get_deletion_error_message('usuário')
             )
     except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail=f'Erro inesperado ao excluir o usuário: {str(e)}',
+            detail=get_unexpected_error_message(
+                'excluir o usuário', str(e)
+            ),
         )
 
     return User.DeleteResponse(message='Usuário excluído com sucesso.')

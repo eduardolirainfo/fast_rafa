@@ -1,8 +1,8 @@
-"""update data_validade
+"""incluir username no user
 
-Revision ID: 5256a6de13f3
+Revision ID: 0b28466ecfc3
 Revises: 
-Create Date: 2024-10-27 21:39:19.508125
+Create Date: 2024-10-27 22:40:49.806017
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '5256a6de13f3'
+revision: str = '0b28466ecfc3'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -71,6 +71,7 @@ def upgrade() -> None:
     sa.Column('primeiro_nome', sa.String(), nullable=False),
     sa.Column('sobrenome', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
+    sa.Column('username', sa.String(), nullable=False),
     sa.Column('senha_hash', sa.String(), nullable=False),
     sa.Column('telefone', sa.String(), nullable=False),
     sa.Column('id_organizacao', sa.Integer(), nullable=False),
@@ -85,7 +86,8 @@ def upgrade() -> None:
     sa.Column('atualizado_em', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['id_organizacao'], ['organizations.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email')
+    sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('username')
     )
     op.create_table('events',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
