@@ -1,13 +1,19 @@
 from datetime import date, datetime
 from typing import Dict, Optional
 
-from pydantic import BaseModel
 from sqlalchemy import (
-    Boolean, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fast_rafa.models.base import table_registry
+from fast_rafa.schemas.post import CreatePost
 
 
 @table_registry.mapped_as_dataclass
@@ -43,39 +49,19 @@ class Post:
     )
 
     __table_args__ = (
-        UniqueConstraint('id_usuario', 'titulo', 'descricao', 'data_validade',
-                         name='uix_usuario_titulo_descricao_data'),
+        UniqueConstraint(
+            'id_usuario',
+            'titulo',
+            'descricao',
+            'data_validade',
+            name='uix_usuario_titulo_descricao_data',
+        ),
     )
 
-    def __init__(self, post_data: 'CreatePostRequest'):
-        self.item = post_data.item
-        self.id_organizacao = post_data.id_organizacao
-        self.id_usuario = post_data.id_usuario
-        self.titulo = post_data.titulo
-        self.descricao = post_data.descricao
-        self.quantidade = post_data.quantidade
-        self.id_categoria = post_data.id_categoria
-        self.url_imagem_post = post_data.url_imagem_post
-        self.data_validade = post_data.data_validade
-        self.status = post_data.status
-        self.criado_em = post_data.criado_em
-        self.atualizado_em = post_data.atualizado_em
-
-    def to_dict(self):
-        return {
-            'item': self.item,
-            'id_organizacao': self.id_organizacao,
-            'id_usuario': self.id_usuario,
-            'titulo': self.titulo,
-            'descricao': self.descricao,
-            'quantidade': self.quantidade,
-            'id_categoria': self.id_categoria,
-            'url_imagem_post': self.url_imagem_post,
-            'data_validade': self.data_validade,
-            'status': self.status,
-            'criado_em': self.criado_em.isoformat(),
-            'atualizado_em': self.atualizado_em.isoformat(),
-        }
+    def __init__(self, data: 'CreatePost'):
+        for key, value in data.dict().items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     organizations = relationship('Organization', back_populates='posts')
     uploader = relationship('User', back_populates='posts')
@@ -90,22 +76,8 @@ class Post:
     )
     message = relationship('Message', back_populates='post')
 
-    class CreatePostRequest(BaseModel):
-        item: bool
-        id_organizacao: int
-        id_usuario: int
-        titulo: str
-        descricao: str
-        quantidade: str
-        id_categoria: int
-        url_imagem_post: Optional[str] = None
-        data_validade: Optional[datetime] = None
-        status: Optional[int] = 1  # 1 = ativo
-        criado_em: datetime = datetime.utcnow()
-        atualizado_em: datetime = datetime.utcnow()
-
     @classmethod
-    def create(cls, data: CreatePostRequest) -> 'Post':
+    def create(cls, data: 'CreatePost') -> 'Post':
         return cls(data)
 
     @classmethod
@@ -119,22 +91,3 @@ class Post:
     def delete(cls, data: dict):
         post = cls(**data)
         return post
-
-    class UpdateRequest(BaseModel):
-        item: Optional[bool]
-        id_organizacao: Optional[int]
-        id_usuario: Optional[int]
-        titulo: Optional[str]
-        descricao: Optional[str]
-        quantidade: Optional[str]
-        id_categoria: Optional[int]
-        url_imagem_post: Optional[str]
-        data_validade: Optional[datetime]
-        status: Optional[int]
-        atualizado_em: Optional[datetime] = datetime.utcnow()
-
-    class UpdateResponse(BaseModel):
-        message: str
-
-    class DeleteResponse(BaseModel):
-        message: str

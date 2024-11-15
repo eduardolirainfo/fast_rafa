@@ -21,13 +21,9 @@ from fast_rafa.models.category import Category
 router = APIRouter()
 
 
-@router.post(
-    '/',
-    status_code=HTTPStatus.CREATED,
-    response_model=dict)
+@router.post('/', status_code=HTTPStatus.CREATED, response_model=dict)
 def create_category(
-    categoria: Category.CreateCategory,
-    db: Session = Depends(get_session)
+    categoria: Category.CreateCategory, db: Session = Depends(get_session)
 ):
     nova_categoria = Category.create(categoria)
 

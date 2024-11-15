@@ -1,33 +1,37 @@
 import re
 from http import HTTPStatus
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fast_rafa.database import get_session
+from fast_rafa.messages.error_messages import (
+    get_conflict_message,
+    get_creation_error_message,
+    get_deletion_error_message,
+    get_not_found_message,
+    get_success_message,
+    get_unexpected_error_message,
+    get_update_error_message,
+)
 from fast_rafa.models.category import Category
 from fast_rafa.models.organization import Organization
 from fast_rafa.models.post import Post
 from fast_rafa.models.user import User
-from fast_rafa.messages.error_messages import (
-    get_not_found_message,
-    get_conflict_message,
-    get_creation_error_message,
-    get_success_message,
-    get_update_error_message,
-    get_deletion_error_message,
-    get_unexpected_error_message,
+from fast_rafa.schemas.post import (
+    CreatePost,
+    DeletePostResponse,
+    PostRead,
+    UpdatePostRequest,
+    UpdatePostResponse,
 )
 
 router = APIRouter()
 
 
-@router.post('/', status_code=HTTPStatus.CREATED, response_model=Post)
-def create_post(
-    post: Post.CreatePostRequest, db: Session = Depends(get_session)
-):
+@router.post('/', status_code=HTTPStatus.CREATED, response_model=dict)
+def create_post(post: CreatePost, db: Session = Depends(get_session)):
     categoria = (
         db.query(Category).filter(Category.id == post.id_categoria).all()
     )
@@ -85,19 +89,22 @@ def create_post(
         db.rollback()
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail=get_unexpected_error_message(
-                'criar a postagem', str(e)
-            ),
+            detail=get_unexpected_error_message('criar a postagem', str(e)),
         )
+    novo_post = PostRead.from_orm(nova_postagem).to_dict()
+    return novo_post
 
-    return nova_postagem
 
-
-@router.get('/', status_code=HTTPStatus.OK, response_model=list[Post])
+@router.get('/', status_code=HTTPStatus.OK, response_model=dict)
 def read_posts(
-    skip: int = 0, limit: int = 10, db: Session = Depends(get_session)
+    skip: int = 0,
+    limit: int = 10,
+    order_by: str = 'titulo',
+    db: Session = Depends(get_session),
 ):
-    postagens = db.query(Post).offset(skip).limit(limit).all()
+    postagens = (
+        db.query(Post).order_by(order_by).offset(skip).limit(limit).all()
+    )
 
     if not postagens:
         raise HTTPException(
@@ -105,10 +112,12 @@ def read_posts(
             detail=get_not_found_message('Postagem'),
         )
 
-    return postagens
+    postagens = [PostRead.from_orm(post).to_dict() for post in postagens]
+
+    return {'posts': postagens}
 
 
-@router.get('/{post_id}', status_code=HTTPStatus.OK, response_model=Post)
+@router.get('/{post_id}', status_code=HTTPStatus.OK, response_model=dict)
 def read_post_by_id(post_id: int, db: Session = Depends(get_session)):
     postagem = db.query(Post).filter(Post.id == post_id).first()
 
@@ -117,12 +126,12 @@ def read_post_by_id(post_id: int, db: Session = Depends(get_session)):
             status_code=HTTPStatus.NOT_FOUND,
             detail=get_not_found_message('Postagem'),
         )
-
-    return postagem
+    post = PostRead.from_orm(postagem).to_dict()
+    return post
 
 
 @router.get(
-    '/name/{post_name}', status_code=HTTPStatus.OK, response_model=List[Post]
+    '/name/{post_name}', status_code=HTTPStatus.OK, response_model=dict
 )
 def read_post_by_name(post_name: str, db: Session = Depends(get_session)):
     postagens = (
@@ -141,12 +150,17 @@ def read_post_by_name(post_name: str, db: Session = Depends(get_session)):
             detail=get_not_found_message('Postagem'),
         )
 
-    return postagens
+    post_by_name = [
+        PostRead.from_orm(postagens).to_dict() for postagens in postagens
+    ]
+    return {'posts': post_by_name}
 
 
 @router.put('/{post_id}', status_code=HTTPStatus.OK, response_model=Post)
 def update_post(
-    post_id: int, post: Post.UpdateRequest, db: Session = Depends(get_session)
+    post_id: int,
+    post: UpdatePostRequest,
+    db: Session = Depends(get_session),
 ):
     postagem = db.query(Post).filter(Post.id == post_id).first()
 
@@ -217,13 +231,15 @@ def update_post(
                 'atualizar a postagem', str(e)
             ),
         )
-    return post_atualizado
+    return UpdatePostResponse(
+        message=get_success_message('Postagem atualizada')
+    )
 
 
 @router.delete(
     '/{post_id}',
     status_code=HTTPStatus.OK,
-    response_model=Post.DeleteResponse,
+    response_model=DeletePostResponse,
 )
 def delete_post(post_id: int, db: Session = Depends(get_session)):
     postagem = db.query(Post).filter(Post.id == post_id).first()
@@ -258,10 +274,6 @@ def delete_post(post_id: int, db: Session = Depends(get_session)):
         db.rollback()
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail=get_unexpected_error_message(
-                'deletar a postagem', str(e)
-            ),
+            detail=get_unexpected_error_message('deletar a postagem', str(e)),
         )
-    return Post.DeleteResponse(
-        message=get_success_message('Postagem deletada')
-    )
+    return DeletePostResponse(message=get_success_message('Postagem deletada'))

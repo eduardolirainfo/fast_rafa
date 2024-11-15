@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from fast_rafa.routes.auth import router as token_router
 from fast_rafa.routes.calendar import router as calendar_router
 from fast_rafa.routes.category import router as category_router
 from fast_rafa.routes.delivery import router as delivery_router
@@ -8,6 +9,7 @@ from fast_rafa.routes.favorite import router as favorite_router
 from fast_rafa.routes.message import router as message_router
 from fast_rafa.routes.organization import router as organization_router
 from fast_rafa.routes.post import router as post_router
+from fast_rafa.routes.seed import router as seed_router
 from fast_rafa.routes.user import router as user_router
 from fast_rafa.routes.watchlist import router as watchlist_router
 
@@ -76,3 +78,8 @@ app.include_router(
     prefix='/api/v' + app.version + '/messages',
     tags=['Messages'],
 )
+
+
+app.include_router(token_router, tags=['auth'])
+
+app.include_router(seed_router, prefix='/api/v' + app.version, tags=['Seed'])

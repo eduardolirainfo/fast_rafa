@@ -1,17 +1,20 @@
 [tool.poetry]
 name = "fast-rafa"
 version = "0.1.0"
-description = "Sistema de Redistribuição e Apoio Alimentar"
+description = "Rede de Alimentos e Fornecimento Assistencial"
 authors = ["Eduardo Lira <eduardolirainfo@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "3.12.*"
-fastapi = "^0.112.1"
+fastapi = { extras = ["standard"], version = "^0.115.5" }
 sqlalchemy = "^2.0.34"
 pydantic-settings = "^2.5.2"
 alembic = "^1.13.2"
-pwdlib = {extras = ["argon2"], version = "^0.2.1"}
+pwdlib = { extras = ["argon2"], version = "^0.2.1" }
+python-multipart = "^0.0.16"
+faker = "^30.8.1"
+pyjwt = "^2.9.0"
 
 
 [tool.poetry.group.dev.dependencies]

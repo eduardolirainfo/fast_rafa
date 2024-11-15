@@ -4,61 +4,52 @@ from sqlalchemy.orm import Session
 
 from fast_rafa.database import get_session
 from fast_rafa.models.category import Category
+from fast_rafa.models.seed import SeedStatus
+
+
+def seed_all(session: Session = Depends(get_session)):
+    """Envie todos os dados iniciais apenas uma vez."""
+    # Verifica se já foi executado
+    seed_status = session.scalar(select(SeedStatus).where(SeedStatus.id == 1))
+
+    if seed_status is None:
+        # Adiciona um novo status de seed
+        session.add(SeedStatus(id=1, seeded=True))
+        session.commit()
+
+        # Chama a função para seed das categorias
+        seed_categories(session)
+        print('Inclusão de dados iniciais realizada com sucesso!')
+    else:
+        print('Os dados iniciais já foram inseridos.')
 
 
 def seed_categories(session: Session = Depends(get_session)):
-    laticinios = Category(categoria='Laticínios')
-    db_lat = session.scalar(
-        select(Category).where((Category.categoria == 'Laticínios'))
-    )
+    categorias = [
+        {'categoria': 'Laticínios'},
+        {'categoria': 'Vegetais'},
+        {'categoria': 'Frutas'},
+        {'categoria': 'Grãos'},
+        {'categoria': 'Proteínas'},
+    ]
 
-    if db_lat is None:
-        session.add(laticinios)
-        session.commit()
-        session.refresh(db_lat)
+    for cat in categorias:
+        nova_categoria_data = Category.CreateCategory(**cat)
 
-    vegetais = Category(categoria='Vegetais')
-    db_veg = session.scalar(
-        select(Category).where((Category.categoria == 'Vegetais'))
-    )
+        nova_categoria = Category.create(nova_categoria_data)
 
-    if db_veg is None:
-        session.add(vegetais)
-        session.commit()
-        session.refresh(db_veg)
+        db_categoria = session.scalar(
+            select(Category).where(
+                Category.categoria == nova_categoria.categoria
+            )
+        )
 
-    frutas = Category(categoria='Frutas')
+        if db_categoria is None:
+            session.add(nova_categoria)
+            session.commit()
+            session.refresh(nova_categoria)
 
-    db_fru = session.scalar(
-        select(Category).where((Category.categoria == 'Frutas'))
-    )
-
-    if db_fru is None:
-        session.add(frutas)
-        session.commit()
-        session.refresh(db_fru)
-
-    graos = Category(categoria='Grãos')
-
-    db_gra = session.scalar(
-        select(Category).where((Category.categoria == 'Grãos'))
-    )
-
-    if db_gra is None:
-        session.add(graos)
-        session.commit()
-        session.refresh(db_gra)
-
-    proteinas = Category(categoria='Proteínas')
-
-    db_pro = session.scalar(
-        select(Category).where((Category.categoria == 'Proteínas'))
-    )
-
-    if db_pro is None:
-        session.add(proteinas)
-        session.commit()
-        session.refresh(db_pro)
+    return 'Categorias incluídas com sucesso!'
 
 
 def undo_categories(session: Session = Depends(get_session)):
