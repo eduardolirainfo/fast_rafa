@@ -1,43 +1,24 @@
-from fastapi import Depends
+from typing import Optional
+
+from faker import Faker
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
-from fast_rafa.database import get_session
-from fast_rafa.models.category import Category
-from fast_rafa.models.seed import SeedStatus
+from fast_rafa.core.logger import setup_logger
+from fast_rafa.modules.categories.models import Category
+from fast_rafa.modules.categories.schemas import CreateCategory
 
-
-def seed_all(session: Session = Depends(get_session)):
-    """Envie todos os dados iniciais apenas uma vez."""
-    # Verifica se já foi executado
-    seed_status = session.scalar(select(SeedStatus).where(SeedStatus.id == 1))
-
-    if seed_status is None:
-        # Adiciona um novo status de seed
-        session.add(SeedStatus(id=1, seeded=True))
-        session.commit()
-
-        # Chama a função para seed das categorias
-        seed_categories(session)
-        print('Inclusão de dados iniciais realizada com sucesso!')
-    else:
-        print('Os dados iniciais já foram inseridos.')
+fake = Faker('pt_BR')
+logger = setup_logger()
 
 
-def seed_categories(session: Session = Depends(get_session)):
-    categorias = [
-        {'categoria': 'Laticínios'},
-        {'categoria': 'Vegetais'},
-        {'categoria': 'Frutas'},
-        {'categoria': 'Grãos'},
-        {'categoria': 'Proteínas'},
-    ]
+async def criar_categoria_fixa(session, categoria: str) -> Optional[Category]:
+    """Cria uma categoria fixa se ainda não existir."""
+    try:
+        categoria_data = CreateCategory(categoria=categoria)
+        nova_categoria = Category.create(categoria_data)
 
-    for cat in categorias:
-        nova_categoria_data = Category.CreateCategory(**cat)
-
-        nova_categoria = Category.create(nova_categoria_data)
-
+        # Verifica se a categoria já existe
         db_categoria = session.scalar(
             select(Category).where(
                 Category.categoria == nova_categoria.categoria
@@ -48,10 +29,90 @@ def seed_categories(session: Session = Depends(get_session)):
             session.add(nova_categoria)
             session.commit()
             session.refresh(nova_categoria)
+            logger.info(f'Categoria fixa criada: {nova_categoria.categoria}')
+            return nova_categoria
+        else:
+            logger.warning(
+                f'Categoria fixa já existe: {nova_categoria.categoria}'
+            )
+            return None
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f'Erro ao criar categoria fixa: {str(e)}')
+        return None
 
-    return 'Categorias incluídas com sucesso!'
+
+async def criar_categoria_dinamica(session) -> Optional[Category]:
+    """Cria uma categoria dinâmica usando dados gerados pelo Faker."""
+    try:
+        dados = {
+            'categoria': fake.word().capitalize(),
+        }
+
+        categoria_data = CreateCategory(**dados)
+        nova_categoria = Category.create(categoria_data)
+
+        # Verifica se a categoria já existe
+        db_categoria = session.scalar(
+            select(Category).where(
+                Category.categoria == nova_categoria.categoria
+            )
+        )
+
+        if db_categoria is None:
+            session.add(nova_categoria)
+            session.commit()
+            session.refresh(nova_categoria)
+            logger.info(
+                f'Categoria dinâmica criada: {nova_categoria.categoria}'
+            )
+            return nova_categoria
+        else:
+            logger.warning(
+                f'Categoria dinâmica já existe: {nova_categoria.categoria}'
+            )
+            return None
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f'Erro ao criar categoria dinâmica: {str(e)}')
+        return None
 
 
-def undo_categories(session: Session = Depends(get_session)):
-    session.execute('TRUNCATE categories RESTART IDENTITY CASCADE;')
+async def seed_categories(session):
+    categorias_fixas = [
+        'Laticínios',
+        'Vegetais',
+        'Frutas',
+        'Grãos',
+        'Proteínas',
+    ]
+    MAX_DINAMICAS = 10  # Número de categorias dinâmicas adicionais
+    criadas_fixas = 0
+    criadas_dinamicas = 0
+
+    logger.info('Iniciando seed de categorias...')
+
+    # Criando categorias fixas
+    for categoria in categorias_fixas:
+        if await criar_categoria_fixa(session, categoria):
+            criadas_fixas += 1
+
+    # Criando categorias dinâmicas
+    while criadas_dinamicas < MAX_DINAMICAS:
+        if await criar_categoria_dinamica(session):
+            criadas_dinamicas += 1
+
+    logger.info(
+        f'Seed de categorias concluído. {criadas_fixas}'
+        'fixas e {criadas_dinamicas} dinâmicas criadas.'
+    )
+    return f'{criadas_fixas} categorias fixas e '
+    f'{criadas_dinamicas} dinâmicas incluídas com sucesso!'
+
+
+async def undo_categories(session):
+    # Deleta todos os registros da tabela 'categories'
+    session.query(Category).delete()
     session.commit()
+    logger.info('Categorias removidas com sucesso!')
+    return 'Categorias removidas com sucesso!'

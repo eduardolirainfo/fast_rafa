@@ -4,14 +4,15 @@ from faker import Faker
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
-from fast_rafa.models.organization import Organization
-from fast_rafa.models.post import Post
-from fast_rafa.models.user import User
+from fast_rafa.modules.organizations.models import Organization
+from fast_rafa.modules.posts.models import Post
+from fast_rafa.modules.posts.schemas import CreatePost
+from fast_rafa.modules.users.models import User
 
-fake = Faker()
+fake = Faker('pt_BR')
 
 
-def seed_posts(session: Session):
+async def seed_posts(session: Session):
     # Obter IDs de categorias, organizações e usuários
     organizacoes = session.query(Organization).all()
     organizacao_ids = [org.id for org in organizacoes]
@@ -40,7 +41,7 @@ def seed_posts(session: Session):
             'atualizado_em': fake.date_time_this_year(),
         }
 
-        novo_post_data = Post.CreatePost(**dados)  # Usando a função CreatePost
+        novo_post_data = CreatePost(**dados)  # Usando a função CreatePost
         novo_post = Post.create(novo_post_data)  # Criando o post
 
         db_post = session.scalar(
@@ -55,7 +56,7 @@ def seed_posts(session: Session):
     return 'Posts criados com sucesso!'
 
 
-def undo_posts(session: Session):
+async def undo_posts(session: Session):
     session.execute(text('DELETE FROM posts;'))
     session.execute(text('DELETE FROM sqlite_sequence WHERE name="posts";'))
     session.commit()

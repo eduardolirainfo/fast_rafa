@@ -4,8 +4,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from fast_rafa.models.base import table_registry
-from fast_rafa.settings import Settings
+from fast_rafa.modules.base.models import table_registry
+from fast_rafa.core.settings import Settings
 
 config = context.config
 config.set_main_option("sqlalchemy.url", Settings().DATABASE_URL)

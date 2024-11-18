@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="light">
+  <head>
+    {% block head %}
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', path='/css/output.css') }}"
+    />
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>{% block title %}{% endblock %} - To-Do List</title>
+    {% endblock %}
+  </head>
+  <body>
+    <header class="fixed z-20 w-full backdrop-blur-md">
+      {% include 'base/partials/_navbar.html' %}
+    </header>
+    <br />
+
+    <main class="container mx-auto max-w-4xl mt-20 flex justify-center">
+      {% block content %} {% endblock %}
+    </main>
+    <footer
+      class="container mx-auto max-w-4xl mt-20 text-center text-neutral glass"
+    >
+      {% block footer %}
+      <p class="text-sm">
+        © 2024 To-Do List - Criado por
+        <a
+          href="https://github.com/eduardolirainfo"
+          target="_blank"
+          class="text-primary"
+          >Eduardo Lira</a
+        >
+      </p>
+
+      <br />
+      {% endblock %}
+    </footer>
+
+    <script>
+      const themeController = document.querySelector(".theme-controller");
+      const swapOn = document.querySelector(".swap-on");
+      const swapOff = document.querySelector(".swap-off");
+      const body = document.querySelector("html");
+
+      // Retrieve theme from local storage on page load
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        body.setAttribute("data-theme", savedTheme);
+        if (savedTheme === "dark") {
+          swapOn.style.display = "block";
+          swapOff.style.display = "none";
+          themeController.checked = true;
+        } else {
+          swapOn.style.display = "none";
+          swapOff.style.display = "block";
+          themeController.checked = false;
+        }
+      }
+
+      themeController.addEventListener("change", () => {
+        if (themeController.checked) {
+          body.setAttribute("data-theme", "dark");
+          swapOn.style.display = "block";
+          swapOff.style.display = "none";
+          localStorage.setItem("theme", "dark");
+        } else {
+          body.setAttribute("data-theme", "light");
+          swapOn.style.display = "none";
+          swapOff.style.display = "block";
+          localStorage.setItem("theme", "light");
+        }
+      });
+    </script>
+  </body>
+</html>

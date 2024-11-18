@@ -1,17 +1,23 @@
 from fastapi import FastAPI
+from starlette import status
+from starlette.responses import RedirectResponse
+from starlette.staticfiles import StaticFiles
 
-from fast_rafa.routes.auth import router as token_router
-from fast_rafa.routes.calendar import router as calendar_router
-from fast_rafa.routes.category import router as category_router
-from fast_rafa.routes.delivery import router as delivery_router
-from fast_rafa.routes.event import router as event_router
-from fast_rafa.routes.favorite import router as favorite_router
-from fast_rafa.routes.message import router as message_router
-from fast_rafa.routes.organization import router as organization_router
-from fast_rafa.routes.post import router as post_router
-from fast_rafa.routes.seed import router as seed_router
-from fast_rafa.routes.user import router as user_router
-from fast_rafa.routes.watchlist import router as watchlist_router
+from fast_rafa.modules.auth.routes import router as token_router
+from fast_rafa.modules.calendars.routes import router as calendar_router
+from fast_rafa.modules.categories.routes import router as category_router
+from fast_rafa.modules.deliveries.routes import router as delivery_router
+from fast_rafa.modules.events.routes import router as event_router
+from fast_rafa.modules.favorites.routes import router as favorite_router
+from fast_rafa.modules.home.routes import router as home_router
+from fast_rafa.modules.messages.routes import router as message_router
+from fast_rafa.modules.organizations.routes import (
+    router as organization_router,
+)
+from fast_rafa.modules.posts.routes import router as post_router
+from fast_rafa.modules.seeds.routes import router as seed_router
+from fast_rafa.modules.users.routes import router as user_router
+from fast_rafa.modules.watchlists.routes import router as watchlist_router
 
 app = FastAPI(
     title='fast_rafa',
@@ -20,6 +26,19 @@ app = FastAPI(
 )
 
 app.version = '1'
+
+
+app.mount(
+    '/static',
+    StaticFiles(directory='fast_rafa/static'),
+    name='static',
+)
+
+
+@app.get('/')
+def home():
+    return RedirectResponse('/home', status_code=status.HTTP_302_FOUND)
+
 
 app.include_router(
     organization_router,
@@ -83,3 +102,10 @@ app.include_router(
 app.include_router(token_router, tags=['auth'])
 
 app.include_router(seed_router, prefix='/api/v' + app.version, tags=['Seed'])
+
+app.include_router(
+    home_router,
+    prefix='/home',
+    tags=['home'],
+    responses={404: {'description': 'Not found'}},
+)
