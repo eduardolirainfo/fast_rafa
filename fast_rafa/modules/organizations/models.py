@@ -98,3 +98,7 @@ class Organization:
     @classmethod
     def delete(cls, id: int):
         return id
+
+    @property
+    def display_name(self) -> str:
+        return f'{self.nome} - {self.cidade}/{self.estado}'

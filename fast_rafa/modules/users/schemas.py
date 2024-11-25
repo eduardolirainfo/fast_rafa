@@ -1,6 +1,19 @@
+import enum
+from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, EmailStr, constr, validator
+
+from fast_rafa.core.logger import setup_logger
+
+logger = setup_logger()
+
+
+class SexoEnum(str, enum.Enum):
+    MASCULINO = 'M'
+    FEMININO = 'F'
+    OUTRO = 'O'
+    NAO_INFORMADO = 'NI'
 
 
 class CreateUser(BaseModel):
@@ -10,15 +23,28 @@ class CreateUser(BaseModel):
     eh_gerente: bool = False
     primeiro_nome: constr(max_length=50)
     sobrenome: constr(max_length=50)
-    email: str
-    username: str
+    email: EmailStr
+    username: constr(max_length=50)
     senha_hash: constr(max_length=255)
     telefone: constr(max_length=20)
     deficiencia_auditiva: Optional[bool] = None
     usa_cadeira_rodas: Optional[bool] = None
     deficiencia_cognitiva: Optional[bool] = None
     lgbtq: Optional[bool] = None
-    url_imagem_perfil: Optional[str] = None
+    url_imagem_perfil: str | None = None
+    aniversario: Optional[date] = None
+    sexo: Optional[SexoEnum] = None
+
+    @validator('aniversario', pre=True)
+    def parse_date(cls, value):
+        if isinstance(value, str):
+            try:
+                return datetime.strptime(value, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValueError(
+                    'Data inválida. O formato esperado é YYYY-MM-DD.'
+                )
+        return value
 
 
 class UpdateUserRequest(BaseModel):
@@ -37,6 +63,8 @@ class UpdateUserRequest(BaseModel):
     deficiencia_cognitiva: Optional[bool] = None
     lgbtq: Optional[bool] = None
     url_imagem_perfil: Optional[str] = None
+    aniversario: Optional[date] = None  # Novo campo de aniversário
+    sexo: Optional[SexoEnum] = None  # Novo campo de sexo
 
 
 class CreateUserResponse(BaseModel):
@@ -53,6 +81,7 @@ class UserResponse(BaseModel):
     sobrenome: str
     email: str
     url_imagem_perfil: str = ''
+    image_perfil_base64: Optional[str] = None
     id_organizacao: Optional[int] = None
     eh_deletado: bool
     eh_voluntario: bool
@@ -100,6 +129,27 @@ class UserResponse(BaseModel):
             telefone=usuario.telefone,
             url_imagem_perfil=url_imagem,
         )
+
+
+# class UserService:
+#     @staticmethod
+#     def convert_user_image(user):
+#         if (
+#             user and user.url_imagem_perfil
+#         ):  # ajuste para o nome do seu campo BLOB
+#             try:
+#                 image_perfil_base64 = base64.b64encode(
+#                     user.url_imagem_perfil
+#                 ).decode('utf-8')
+#                 user.image_perfil_base64 = (
+#                     image_perfil_base64  # adiciona novo atributo ao user
+#                 )
+#             except Exception as e:
+#                 logger.error(f'Erro ao converter imagem: {e}')
+#                 user.image_perfil_base64 = None
+#         else:
+#             user.image_perfil_base64 = None
+#         return user
 
 
 class UpdateUserResponse(UserResponse):

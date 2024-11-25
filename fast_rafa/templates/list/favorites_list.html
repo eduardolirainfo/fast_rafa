@@ -1,0 +1,54 @@
+{% extends "../base/layout.html" %} {% block title %}Favoritos{% endblock %} {%
+block content %}
+<div class="container mx-auto px-4">
+  <h1 class="text-2xl font-bold mb-4">Meus Favoritos</h1>
+
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for favorite in favorites %}
+    <div class="bg-base-100 shadow-md rounded-lg p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">{{ favorite.posts.titulo }}</h2>
+        <span class="text-sm text-base-500"
+          >{{ favorite.criado_em.strftime('%d/%m/%Y') }}</span
+        >
+      </div>
+
+      <div class="mb-4">
+        <img
+          src="{{ favorite.posts.url_imagem }}"
+          alt="{{ favorite.posts.titulo }}"
+          class="w-full h-48 object-cover rounded-lg"
+        />
+      </div>
+
+      <div class="flex justify-between items-center">
+        <a
+          href="/posts/{{ favorite.posts.id }}"
+          class="text-blue-600 hover:underline"
+        >
+          Ver Postagem
+        </a>
+        <a
+          href="/favorites/remove/{{ favorite.id }}"
+          class="text-red-600 hover:underline"
+        >
+          Remover
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if favorites|length == 0 %}
+  <div class="text-center py-8">
+    <p class="text-base-600">Você ainda não tem favoritos</p>
+    <a
+      href="/explore"
+      class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 inline-block"
+    >
+      Explorar Doações
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

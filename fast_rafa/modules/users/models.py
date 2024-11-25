@@ -1,13 +1,29 @@
 # models/user.py
 
-from datetime import datetime
+import enum
+from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Integer
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fast_rafa.modules.base.models import table_registry
 from fast_rafa.modules.users.schemas import CreateUser
+
+
+class SexoEnum(str, enum.Enum):
+    MASCULINO = 'M'
+    FEMININO = 'F'
+    OUTRO = 'O'
+    NAO_INFORMADO = 'NI'
 
 
 @table_registry.mapped_as_dataclass
@@ -17,25 +33,37 @@ class User:
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True
     )
-    primeiro_nome: Mapped[str] = mapped_column()
-    sobrenome: Mapped[str] = mapped_column()
-    email: Mapped[str] = mapped_column(unique=True)
-    username: Mapped[str] = mapped_column(unique=True)
-    senha_hash: Mapped[str] = mapped_column()
-    telefone: Mapped[str] = mapped_column()
+    primeiro_nome: Mapped[str] = mapped_column(String(100))
+    sobrenome: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    username: Mapped[str] = mapped_column(String(150), unique=True)
+    senha_hash: Mapped[str] = mapped_column(String(60), nullable=False)
+    telefone: Mapped[str] = mapped_column(String(20), nullable=False)
     id_organizacao: Mapped[int] = mapped_column(
         Integer,
         ForeignKey('organizations.id', ondelete='CASCADE'),
         nullable=False,
     )
-    eh_deletado: Mapped[bool] = mapped_column(default=False)
-    eh_voluntario: Mapped[bool] = mapped_column(default=False)
-    eh_gerente: Mapped[bool] = mapped_column(default=False)
-    deficiencia_auditiva: Mapped[Optional[bool]] = mapped_column(default=None)
-    usa_cadeira_rodas: Mapped[Optional[bool]] = mapped_column(default=None)
-    deficiencia_cognitiva: Mapped[Optional[bool]] = mapped_column(default=None)
-    lgbtq: Mapped[Optional[bool]] = mapped_column(default=None)
-    url_imagem_perfil: Mapped[Optional[str]] = mapped_column(default=None)
+    url_imagem_perfil: Mapped[Optional[String]] = mapped_column(
+        String, nullable=True
+    )
+    eh_deletado: Mapped[bool] = mapped_column(Boolean, default=False)
+    eh_voluntario: Mapped[bool] = mapped_column(Boolean, default=False)
+    eh_gerente: Mapped[bool] = mapped_column(Boolean, default=False)
+    deficiencia_auditiva: Mapped[Optional[bool]] = mapped_column(
+        Boolean, default=None
+    )
+    usa_cadeira_rodas: Mapped[Optional[bool]] = mapped_column(
+        Boolean, default=None
+    )
+    deficiencia_cognitiva: Mapped[Optional[bool]] = mapped_column(
+        Boolean, default=None
+    )
+    lgbtq: Mapped[Optional[bool]] = mapped_column(Boolean, default=None)
+    aniversario: Mapped[Optional[date]] = mapped_column(Date, default=None)
+    sexo: Mapped[Optional[SexoEnum]] = mapped_column(
+        Enum(SexoEnum), default=None
+    )
     criado_em: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )
@@ -79,3 +107,10 @@ class User:
             setattr(instance, key, value)
         instance.atualizado_em = datetime.utcnow()
         return instance
+
+    @property
+    def get_user_with_organization(self):
+        """Propriedade que retorna o usuário com a organização carregada"""
+        if self.organization:
+            return self
+        return None

@@ -1,3 +1,4 @@
+from fast_rafa.modules.categories_main.models import CategoryMain  # noqa
 from fast_rafa.modules.categories.models import Category  # noqa
 from fast_rafa.modules.organizations.models import Organization  # noqa
 from fast_rafa.modules.users.models import User  # noqa

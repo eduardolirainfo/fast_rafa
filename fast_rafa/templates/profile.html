@@ -1,0 +1,150 @@
+{% extends "base/layout.html" %} {% block title %}Perfil de {{
+current_user.primeiro_nome }} {{ current_user.sobrenome }}{% endblock %} {%
+block content %}
+
+<!-- Profile Header -->
+{% if current_user.sexo == 'F' and not current_user.lgbtq %}
+<div class="bg-gradient-to-r from-blue-500 to-purple-600 py-12 relative h-32">
+  {% elif current_user.sexo == 'M' and not current_user.lgbtq %}
+  <div class="bg-gradient-to-r from-green-500 to-blue-600 py-12 relative h-32">
+    {% elif current_user.lgbtq %}
+    <div
+      class="bg-gradient-to-r from-red-500 via-orange-500 via-yellow-500 via-green-500 via-blue-500 via-indigo-500 to-purple-500 py-12 relative h-32"
+    >
+      {% else %}
+      <div
+        class="bg-gradient-to-r from-base-500 to-base-600 py-12 relative h-32"
+      >
+        {% endif %}
+
+        <div
+          class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
+        >
+          {% if current_user.url_imagem_perfil %}
+          <img
+            src="{{ url_for('static',  path=current_user.url_imagem_perfil) }}"
+            alt="Foto de Perfil"
+            class="w-32 h-32 rounded-full border-4 border-white object-cover"
+          />
+          {% else %} {% if current_user.primeiro_nome %}
+          <span class="text-md" title="{{current_user.primeiro_nome}}"
+            >{{current_user.iniciais}}</span
+          >
+          {% endif %} {% endif %}
+        </div>
+      </div>
+
+      <!-- User Details -->
+      <div class="pt-20 text-center">
+        <h1 class="text-2xl font-bold text-base-800">
+          {{ current_user.primeiro_nome }} {{ current_user.sobrenome }}
+        </h1>
+        <p class="text-base-600">@{{ current_user.username }}</p>
+
+        <div class="mt-4 flex justify-center space-x-2">
+          {% if current_user.eh_voluntario %}
+          <span
+            class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center"
+          >
+            <i class="fas fa-hands-helping mr-1"></i> Voluntário
+          </span>
+          {% endif %} {% if current_user.eh_gerente %}
+          <span
+            class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center"
+          >
+            <i class="fas fa-user-tie mr-1"></i> Gerente
+          </span>
+          {% endif %} {% if current_user.deficiencia_auditiva %}
+          <span
+            class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center"
+          >
+            <i class="fas fa-deaf mr-1"></i> Deficiência Auditiva
+          </span>
+          {% endif %} {% if current_user.usa_cadeira_rodas %}
+          <span
+            class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full flex items-center"
+          >
+            <i class="fas fa-wheelchair mr-1"></i> Usa Cadeira de Rodas
+          </span>
+          {% endif %} {% if current_user.deficiencia_cognitiva %}
+          <span
+            class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full flex items-center"
+          >
+            <i class="fas fa-brain mr-1"></i> Deficiência Cognitiva
+          </span>
+          {% endif %} {% if current_user.lgbtq %}
+          <span
+            class="bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded-full flex items-center"
+          >
+            <i class="fas fa-rainbow mr-1"></i> LGBTQIAPN+
+          </span>
+          {% endif %}
+        </div>
+      </div>
+      <!-- Profile Stats -->
+      <div class="mt-6 grid grid-cols-3 gap-4 border-t py-4">
+        <div class="text-center">
+          <span class="block text-xl font-bold text-blue-600">
+            {{ current_user.posts|length }}
+          </span>
+          <span class="text-base-600 text-sm">Doações</span>
+        </div>
+        <div class="text-center">
+          <span class="block text-xl font-bold text-green-600">
+            {{ current_user.favorites|length }}
+          </span>
+          <span class="text-base-600 text-sm">Favoritos</span>
+        </div>
+        <div class="text-center">
+          <span class="block text-xl font-bold text-purple-600">
+            {{ current_user.delivery|length }}
+          </span>
+          <span class="text-base-600 text-sm">Entregas</span>
+        </div>
+      </div>
+
+      <!-- Contact and Organization Info -->
+      <div class="p-4 bg-base-50">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <h3 class="font-semibold text-base-700">Informações de Contato</h3>
+            <p class="text-base-600 mt-2">
+              <i class="fas fa-envelope mr-2"></i>{{ current_user.email }}
+            </p>
+            <p class="text-base-600">
+              <i class="fas fa-phone mr-2"></i>{{ current_user.telefone }}
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold text-base-700">Organização</h3>
+            <p class="text-base-600 mt-2">
+              <i class="fas fa-building mr-2"></i>{{
+              current_user.organization.nome }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Actions -->
+      <div class="p-4 bg-base-100 border-t">
+        <div class="flex space-x-4 justify-center">
+          <a
+            href="/edit-profile"
+            class="btn btn-primary px-4 py-2 rounded-full"
+          >
+            Editar Perfil
+          </a>
+          {% if current_user.eh_voluntario %}
+          <a
+            href="/volunteer-dashboard"
+            class="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700"
+          >
+            Painel do Voluntário
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endblock %}
+    </div>
+  </div>
+</div>

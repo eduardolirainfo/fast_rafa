@@ -42,11 +42,13 @@ async def criar_usuario(session, organizacoes: list) -> Optional[User]:
             'eh_voluntario': fake.boolean(chance_of_getting_true=50),
             'eh_gerente': fake.boolean(chance_of_getting_true=50),
             'id_organizacao': choice(organizacoes),
-            'deficiencia_auditiva': None,
-            'usa_cadeira_rodas': None,
-            'deficiencia_cognitiva': None,
-            'lgbtq': None,
+            'deficiencia_auditiva': fake.boolean(chance_of_getting_true=50),
+            'usa_cadeira_rodas': fake.boolean(chance_of_getting_true=50),
+            'deficiencia_cognitiva': fake.boolean(chance_of_getting_true=50),
+            'lgbtq': fake.boolean(chance_of_getting_true=50),
             'url_imagem_perfil': None,
+            'aniversario': fake.date_of_birth(minimum_age=18, maximum_age=80),
+            'sexo': fake.random_element(elements=('M', 'F', 'O', 'NI')),
         }
 
         novo_usuario_data = CreateUser(**dados)

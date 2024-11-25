@@ -1,8 +1,6 @@
-import uuid
 from datetime import datetime
 
 from faker import Faker
-from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 
 from fast_rafa.core.logger import setup_logger
@@ -10,6 +8,7 @@ from fast_rafa.modules.organizations.models import (
     Organization,
     OrganizationCreate,
 )
+from fast_rafa.utils.funcs import generate_unique_url
 
 fake = Faker('pt_BR')
 logger = setup_logger()
@@ -20,37 +19,6 @@ def gen_random_time():
     minute = fake.random_int(min=0, max=59)
     second = fake.random_int(min=0, max=59)
     return f'{hour:02}:{minute:02}:{second:02}'
-
-
-# Função para verificar se a URL já existe no banco de dados
-def check_url_exists(session, url_logo=None, url_imagem=None):
-    query = session.query(Organization)
-    conditions = []
-
-    if url_logo:
-        conditions.append(Organization.url_logo == url_logo)
-    if url_imagem:
-        conditions.append(Organization.url_imagem == url_imagem)
-
-    if conditions:
-        return query.filter(or_(*conditions)).first() is not None
-    return False
-
-
-def generate_unique_url(session, is_logo=True, max_attempts=10):
-    for _ in range(max_attempts):
-        # Gerando uma URL com UUID único para evitar duplicação
-        url = f'https://picsum.photos/200/200?random={uuid.uuid4()}'
-
-        if is_logo:
-            if not check_url_exists(session, url_logo=url):
-                return url
-        elif not check_url_exists(session, url_imagem=url):
-            return url
-
-    raise ValueError(
-        f'Não foi possível gerar uma URL única após {max_attempts} tentativas'
-    )
 
 
 async def seed_organizations(session):
@@ -72,13 +40,21 @@ async def seed_organizations(session):
                 break
 
             try:
-                url_logo = generate_unique_url(session, is_logo=True)
-                url_imagem = generate_unique_url(session, is_logo=False)
+                url_logo = generate_unique_url(
+                    session, Organization, is_logo=True
+                )
+                url_imagem = generate_unique_url(
+                    session, Organization, is_logo=False
+                )
 
                 if not url_logo:
-                    url_logo = generate_unique_url(session, is_logo=True)
+                    url_logo = generate_unique_url(
+                        session, Organization, is_logo=True
+                    )
                 if not url_imagem:
-                    url_imagem = generate_unique_url(session, is_logo=False)
+                    url_imagem = generate_unique_url(
+                        session, Organization, is_logo=False
+                    )
 
                 dados = {
                     'id_federal': str(fake.unique.random_number(digits=14)),

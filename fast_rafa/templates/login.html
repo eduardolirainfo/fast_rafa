@@ -1,0 +1,124 @@
+{% extends "base/layout.html" %} {% block title %}Entrar{% endblock %} {% block
+content %}
+<div
+  id="mensagem-feedback"
+  class="fixed top-32 right-4 left-4 sm:left-auto max-w-sm z-50"
+  style="display: none"
+>
+  <div class="bg-base-100 border-l-4 p-4 shadow-md rounded-md">
+    <div class="flex items-center">
+      <div class="flex-shrink-0">
+        <i
+          id="icone-feedback"
+          class="fas fa-check-circle text-green-500 text-xl"
+        ></i>
+      </div>
+      <div class="ml-3">
+        <p id="texto-feedback" class="text-sm font-medium"></p>
+      </div>
+      <div class="ml-auto pl-3">
+        <div class="-mx-1.5 -my-1.5">
+          <button
+            onclick="document.getElementById('mensagem-feedback').style.display = 'none'"
+            class="text-base-400 hover:text-base-500"
+          >
+            <span class="sr-only">Fechar</span>
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-base-50 py-6 sm:py-12"
+>
+  <div
+    class="relative bg-base-100 px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10"
+  >
+    <div class="mx-auto max-w-md">
+      <img
+        src="{{ url_for('static', path='img/rafa-logo.svg') }}"
+        alt="Logo"
+        class="w-24 mx-auto"
+      />
+      <div class="mb-6 text-center">
+        <h2 class="text-2xl font-bold text-base-800">Bem-vindo de volta!</h2>
+        <p class="text-sm text-base-600">Faça login para continuar.</p>
+      </div>
+      <div class="divide-y divide-base-300/50">
+        <div class="space-y-6 py-8 text-base leading-7 text-base-600">
+          <form
+            id="formLogin"
+            class="space-y-6 py-8 text-base leading-7 text-base-600"
+          >
+            <div class="relative">
+              <label
+                for="username"
+                class="block text-sm font-medium text-base-700"
+                >Nome de Usuário</label
+              >
+              <div class="relative mt-1">
+                <span
+                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-base-400"
+                >
+                  <i class="fas fa-user"></i>
+                </span>
+                <input
+                  type="text"
+                  name="username"
+                  required
+                  class="pl-10 block w-full max-w-xl rounded-lg input input-bordered input-primary px-3 py-2 text-sm shadow-sm focus:ring focus:ring-blue-200"
+                />
+              </div>
+            </div>
+
+            <div class="relative">
+              <label
+                for="password"
+                class="block text-sm font-medium text-base-700"
+                >Senha</label
+              >
+              <div class="relative mt-1">
+                <span
+                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-base-400"
+                >
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  class="pl-10 block w-full max-w-xl rounded-lg px-3 py-2 text-sm input input-bordered input-primary shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                />
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <button
+                type="submit"
+                class="btn btn-primary w-full rounded-full py-2 transition duration-300"
+              >
+                Entrar
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="pt-8 text-base font-semibold leading-7">
+          <div class="mt-4 text-center">
+            <p class="text-sm text-base-600">
+              Não tem uma conta?
+              <a href="/auth/register" class="text-blue-600 hover:underline"
+                >Registrar</a
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/user_login.js') }}" defer></script>
+{% endblock %} {% endblock %}

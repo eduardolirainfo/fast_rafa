@@ -1,0 +1,122 @@
+{% extends "base/layout.html" %} {% block title %} Rede de Doações {% endblock
+%} {% block content %}
+<!-- New Post Card -->
+{% if current_user is not none %}
+<div class="bg-base-100 rounded-lg shadow-sm p-4">
+  <div class="flex space-x-4">
+    <img
+      src="data:image/jpeg;base64,{{ current_user.image_perfil_base64 }}"
+      alt="Profile"
+      class="h-10 w-10 rounded-full"
+    />
+    <button
+      onclick="window.location.href='/posts/new'"
+      class="flex-1 bg-base-100 hover:bg-base-200 rounded-full px-4 text-left text-base-500"
+    >
+      Compartilhe uma doação...
+    </button>
+  </div>
+  <div class="flex justify-around mt-4 pt-2 border-t">
+    <button
+      class="flex items-center space-x-2 text-base-600 hover:text-blue-600"
+    >
+      <i class="fas fa-image"></i>
+      <span>Foto</span>
+    </button>
+    <button
+      class="flex items-center space-x-2 text-base-600 hover:text-blue-600"
+    >
+      <i class="fas fa-video"></i>
+      <span>Vídeo</span>
+    </button>
+    <button
+      class="flex items-center space-x-2 text-base-600 hover:text-blue-600"
+    >
+      <i class="fas fa-map-marker-alt"></i>
+      <span>Local</span>
+    </button>
+  </div>
+</div>
+{% endif %}
+
+<!-- Posts Feed -->
+{% if posts %} {% for post in posts %}
+<div class="bg-base-100 rounded-lg shadow-sm">
+  <!-- Post Header -->
+  <div class="p-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <img
+        src="{{ post.organizations.url_logo or url_for('static', path='img/default-avatar.png') }}"
+        alt="{{ post.organizations.nome }}"
+        class="h-10 w-10 rounded-full"
+      />
+      <div>
+        <h4 class="font-semibold">{{ post.organizations.nome }}</h4>
+        <p class="text-sm text-base-500">
+          <i class="fas fa-calendar-alt mr-1"></i>{{
+          post.criado_em.strftime('%d/%m/%Y') }}
+          <i class="fas fa-clock ml-2 mr-1"></i>{{
+          post.criado_em.strftime('%H:%M') }}
+        </p>
+      </div>
+    </div>
+    <button class="text-base-400 hover:text-base-600">
+      <i class="fas fa-ellipsis-h"></i>
+    </button>
+  </div>
+
+  <!-- Post Content -->
+  <div class="px-4 pb-2">
+    <p class="mb-2">{{ post.descricao }}</p>
+    {% if post.categories %}
+    <span
+      class="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
+    >
+      {{ post.categories.categoria }}
+    </span>
+    {% endif %}
+  </div>
+
+  <!-- Post Image -->
+  {% if post.url_imagem_post %}
+  <img
+    src="{{ post.url_imagem_post }}"
+    alt="Post image"
+    class="w-full h-48 object-cover rounded-lg"
+  />
+  {% endif %}
+
+  <!-- Post Actions -->
+  <div class="px-4 py-2 flex items-center justify-between border-t">
+    <div class="flex items-center space-x-4">
+      <button
+        class="flex items-center space-x-1 text-base-600 hover:text-blue-600"
+      >
+        <i class="far fa-heart"></i>
+        <span>{{ post.likes_count }}</span>
+      </button>
+      <button
+        class="flex items-center space-x-1 text-base-600 hover:text-blue-600"
+      >
+        <i class="far fa-comment"></i>
+        <span>{{ post.comments_count }}</span>
+      </button>
+      <button
+        class="flex items-center space-x-1 text-base-600 hover:text-blue-600"
+      >
+        <i class="far fa-share-square"></i>
+      </button>
+    </div>
+    <button
+      class="bg-blue-600 text-white px-4 py-1 rounded-full hover:bg-blue-700"
+    >
+      {% if current_user.organization.nao_governamental %} Quero Colaborar {%
+      else %} Quero Ajudar {% endif %}
+    </button>
+  </div>
+</div>
+{% endfor %} {% else %}
+<div class="bg-base-100 rounded-lg shadow-sm p-4">
+  <h4 class="font-semibold text-center">Nenhuma postagem encontrada</h4>
+</div>
+{% endif %} {% endblock %}

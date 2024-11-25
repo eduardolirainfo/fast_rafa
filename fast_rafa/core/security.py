@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from typing import Optional
+from typing import Optional, Tuple
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -94,3 +94,34 @@ async def get_current_active_user(
     if current_user.eh_deletado:
         raise HTTPException(status_code=400, detail='Usuário Inativo')
     return current_user
+
+
+async def get_user_from_cookie(
+    request: Request, db: Session
+) -> Tuple[Optional[User], Optional[str]]:
+    """
+    Tenta obter o usuário atual a partir do token no cookie.
+    Retorna uma tupla com (usuário, mensagem_erro).
+    Se não encontrar usuário, retorna (None, mensagem_erro).
+    """
+    try:
+        token = request.cookies.get('access_token')
+        if not token:
+            return None, 'Token não encontrado no cookie'
+
+        payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
+
+        if not username:
+            return None, 'Username não encontrado no token'
+
+        user = db.scalar(select(User).where(User.username == username))
+        if not user:
+            return None, 'Usuário não encontrado'
+
+        return user, None
+
+    except PyJWTError:
+        return None, 'Token inválido'
+    except Exception as e:
+        return None, f'Erro ao processar token: {str(e)}'

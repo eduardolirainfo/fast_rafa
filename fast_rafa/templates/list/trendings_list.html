@@ -1,0 +1,13 @@
+<!-- Trending Topics -->
+<h4 class="font-semibold mb-4">Campanhas em Destaque</h4>
+{% for event, user_count in suggested_events %} {{ event.slug }}
+<div class="mb-4">
+  <a
+    href="/events/{{ event.slug }}"
+    class="block hover:bg-base-50 p-2 rounded-lg"
+  >
+    <h5 class="font-medium">{{ event.titulo }}</h5>
+    <p class="text-sm text-base-500">{{ user_count }} participantes</p>
+  </a>
+</div>
+{% endfor %}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="category-icon">
+  <style>
+    .category-icon {
+      width: 50px;
+      height: 50px;
+      transition: transform 0.3s ease;
+    }
+    .category-icon:hover {
+      transform: scale(1.1);
+    }
+  </style>
+  <path d="M30 50 Q50 30, 70 50 T110 50" fill="none" stroke="#FF5722" stroke-width="6"/>
+  <circle cx="50" cy="50" r="30" fill="#FFC107" opacity="0.7"/>
+  <text x="50" y="55" text-anchor="middle" fill="#FF5722" font-size="20" font-weight="bold">OK</text>
+</svg>

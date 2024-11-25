@@ -10,6 +10,11 @@ async def run_undo_all(session):
     print(result)
 
 
+async def run_undo_categories_main(session):
+    result = await Seed.undo_categories_main(session)
+    print(result)
+
+
 async def run_undo_categories(session):
     result = await Seed.undo_categories(session)
     print(result)
@@ -56,6 +61,8 @@ async def run_task_undo():
         await run_undo_all(session)
     elif command == 'organizations':
         await run_undo_organizations(session)
+    elif command == 'categories_main':
+        await run_undo_categories_main(session)
     elif command == 'categories':
         await run_undo_categories(session)
     elif command == 'events':

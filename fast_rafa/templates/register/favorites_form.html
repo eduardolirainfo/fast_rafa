@@ -1,0 +1,68 @@
+{% extends "../base/layout.html" %}
+
+{% block title %}{% if favorite %}Editar{% else %}Adicionar{% endif %} Favorito{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 max-w-md">
+    <h1 class="text-2xl font-bold mb-6">
+        {% if favorite %}Editar Favorito{% else %}Adicionar aos Favoritos{% endif %}
+    </h1>
+
+    <form method="POST" class="bg-base-100 shadow-md rounded-lg p-6">
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="id_postagem">Postagem</label>
+            <select
+                name="id_postagem"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                required
+            >
+                {% for post in posts %}
+                <option
+                    value="{{ post.id }}"
+                    {% if favorite and favorite.id_postagem == post.id %}selected{% endif %}
+                >
+                    {{ post.titulo }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% if current_user.eh_gerente %}
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="id_usuario">Usuário</label>
+            <select
+                name="id_usuario"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                required
+            >
+                {% for user in users %}
+                <option
+                    value="{{ user.id }}"
+                    {% if favorite and favorite.id_usuario == user.id %}selected{% endif %}
+                >
+                    {{ user.primeiro_nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% else %}
+        <input type="hidden" name="id_usuario" value="{{ current_user.id }}">
+        {% endif %}
+
+        <div class="flex justify-between items-center">
+            <button
+                type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+            >
+                {% if favorite %}Atualizar{% else %}Adicionar{% endif %}
+            </button>
+            <a
+                href="/favorites"
+                class="text-base-600 hover:underline"
+            >
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

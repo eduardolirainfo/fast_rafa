@@ -20,7 +20,7 @@ def get_local_time_native():
 
 def set_local_time_native(utc_time: datetime) -> datetime:
     """
-    Converte o horário UTC para o fuso horário local e retorna um naive datetime.
+    Converte o horário UTC para o fuso horário local e retorna um horário
 
     :param utc_time: O horário em UTC que será convertido
     :return: O horário convertido para o fuso horário local sem tzinfo

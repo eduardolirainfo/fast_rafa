@@ -1,0 +1,222 @@
+{% extends "base/layout.html" %}
+{% block title %}Registrar{% endblock %}
+{% block content %}
+<div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-base-50 py-6 sm:py-12">
+
+  <div id="mensagem-feedback" class="fixed top-4 right-4 left-4 sm:left-auto max-w-sm z-50" style="display: none;">
+    <div class="bg-base-100 border-l-4 p-4 shadow-md rounded-md">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <i id="icone-feedback" class="fas fa-check-circle text-green-500 text-xl"></i>
+        </div>
+        <div class="ml-3">
+          <p id="texto-feedback" class="text-sm font-medium"></p>
+        </div>
+        <div class="ml-auto pl-3">
+          <div class="-mx-1.5 -my-1.5">
+            <button onclick="document.getElementById('mensagem-feedback').style.display = 'none'" class="text-base-400 hover:text-base-500">
+              <span class="sr-only">Fechar</span>
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="relative bg-base-100 px-6 pt-10 pb-8 shadow-xl ring-1 ring-base-900/5 sm:mx-auto sm:max-w-xl sm:rounded-lg sm:px-10">
+    <img src="{{ url_for('static', path='img/rafa-logo.svg') }}" alt="Logo" class="w-24 mx-auto" />
+    <h2 class="mb-6 text-center text-2xl font-bold text-blue-600">Criar Conta</h2>
+    <div class="mx-auto max-w-lg">
+      <form id="formRegistro" class="space-y-6 py-8 text-base leading-7 text-base-600" method="POST" action="/api/v1/users/">
+            <div class='mt-4'>
+          <label class="block text-sm font-medium text-base-700 mb-2">Foto de Perfil (opcional)</label>
+        <div class="flex flex-col items-center">
+            <div class="relative group cursor-pointer w-32 h-32 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 border-base-300 hover:border-blue-500">
+                <img id="preview-image" class="w-full h-full object-cover hidden" alt="Preview" src="{{ url_for('static', path='img/default-profile.png') }}" />
+                <div id="default-image" class="w-full h-full flex items-center justify-center">
+                    <i class="fas fa-user text-base-500"></i>
+                </div>
+                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="text-white text-sm">
+                        <i class="fas fa-camera mr-1"></i>
+                        Alterar foto
+                    </span>
+                </div>
+            </div>
+            <input type="file"
+                   id="profile-image-input"
+                   name="imagem_perfil"
+                   accept="image/*"
+                   class="hidden" />
+        </div>
+      </div>
+        <div class="grid grid-cols-[1fr_2fr] gap-4">
+          <div class="relative">
+            <label for="primeiro_nome" class="block text-sm font-medium text-base-700">Primeiro Nome</label>
+            <div class="relative">
+              <input type="text" name="primeiro_nome" required class="mt-1 block w-full rounded-lg border border-base-300 px-3 py-2 pl-10 text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+              <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-base-500"></i>
+            </div>
+          </div>
+          <div class="relative">
+            <label for="sobrenome" class="block text-sm font-medium text-base-700">Sobrenome</label>
+            <div class="relative">
+              <input type="text" name="sobrenome" required class="mt-1 block w-full rounded-lg border border-base-300 px-3 py-2 pl-10 text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+              <i class="fas fa-user-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-base-500"></i>
+            </div>
+          </div>
+        </div>
+
+   <!-- Novo Campo: Data de Aniversário -->
+        <div class="relative">
+          <label for="aniversario" class="block text-sm font-medium text-base-700">Data de Aniversário</label>
+          <input type="date" id="aniversario" name="aniversario" min="1900-01-01"
+             max="{{ data_maxima }}"  required class="mt-1 block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+        </div>
+
+        <!-- Novo Campo: Sexo -->
+        <div class="relative">
+          <label for="sexo" class="block text-sm font-medium text-base-700">Sexo</label>
+          <select name="sexo" required class="mt-1 block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+            <option value="O">Outro</option>
+            <option value="NI">Prefiro não dizer</option>
+          </select>
+        </div>
+
+        <div class="relative">
+          <label for="username" class="block text-sm font-medium text-base-700">Nome de Usuário</label>
+          <div class="relative">
+            <input type="text" name="username" required class="mt-1 block w-full max-w-xl rounded-lg border border-base-300 px-3 py-2 pl-10 text-left text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+            <i class="fas fa-user-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-base-500"></i>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-[2fr_1fr] gap-4">
+          <div class="relative">
+            <label for="email" class="block text-sm font-medium text-base-700">Email</label>
+            <div class="relative">
+              <input type="email" name="email" required class="mt-1 block w-full rounded-lg border border-base-300 px-3 py-2 pl-10 text-left text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+              <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-base-500"></i>
+            </div>
+          </div>
+          <div class="relative">
+            <label for="telefone" class="block text-sm font-medium text-base-700">Telefone</label>
+            <div class="relative">
+              <input type="tel" label="telefone"  name="telefone" required class="mt-1 block w-full rounded-lg border border-base-300 px-3 py-2 pl-10 text-left text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+              <i class="fas fa-phone-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-base-500"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <label for="id_organizacao" class="block text-sm font-medium text-base-700">Organização</label>
+          <div class="relative">
+            <select name="id_organizacao" required class="mt-1 block w-full max-w-xl rounded-lg border border-base-300 px-3 py-2 pl-10 text-left text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+              {% for org in organizations %}
+              <option value="{{ org.id }}" class="text-base-900">{{ org.display_name }}</option>
+              {% endfor %}
+            </select>
+            <i class="fas fa-building absolute left-3 top-1/2 transform -translate-y-1/2 text-base-500"></i>
+          </div>
+        </div>
+
+        <div class="relative">
+          <label for="senha_hash" class="block text-sm font-medium text-base-700">Senha</label>
+          <div class="relative">
+            <input type="password" id="senha" name="senha_hash" required class="mt-1 block w-full max-w-xl rounded-lg border border-base-300 px-3 py-2 pl-10 text-left text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-base-500"></i>
+          </div>
+        </div>
+
+        <div class="relative">
+          <label for="confirmar_senha" class="block text-sm font-medium text-base-700">Confirmar Senha</label>
+          <div class="relative">
+            <input type="password" id="confirmar_senha" name="confirmar_senha" required class="mt-1 block w-full max-w-xl rounded-lg border border-base-300 px-3 py-2 pl-10 text-left text-sm text-base-700 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-base-500"></i>
+          </div>
+        </div>
+
+        <div class="flex items-center">
+          <input type="checkbox" name="eh_deletado" value="0" class="hidden mr-2 rounded text-blue-600 focus:ring-blue-500" class='hidden' />
+          <label for="eh_deletado" class="text-sm text-base-700 hidden">Usuário Ativo</label>
+        </div>
+
+        <div class="mt-2">
+          <h3 class="mb-2 text-sm font-medium text-base-700">Características Opcionais</h3>
+          <div class="grid gap-2 md:grid-cols-2">
+
+            <div class="flex items-center">
+              <input type="checkbox" name="deficiencia_auditiva" class="mr-2 rounded text-blue-600 focus:ring-blue-500" />
+              <i class="fas fa-deaf mr-2 text-base-600"></i>
+              <label class="text-sm text-base-700">Deficiência Auditiva</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" name="usa_cadeira_rodas" class="mr-2 rounded text-blue-600 focus:ring-blue-500" />
+              <i class="fas fa-wheelchair mr-2 text-base-600"></i>
+              <label class="text-sm text-base-700">Usa Cadeira de Rodas</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" name="deficiencia_cognitiva" class="mr-2 rounded text-blue-600 focus:ring-blue-500" />
+              <i class="fas fa-brain mr-2 text-base-600"></i>
+              <label class="text-sm text-base-700">Deficiência Cognitiva</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" name="deficiencia_visual" class="mr-2 rounded text-blue-600 focus:ring-blue-500" />
+              <i class="fas fa-low-vision mr-2 text-base-600"></i>
+              <label class="text-sm text-base-700">Deficiência Visual</label>
+            </div>
+
+          <div class="flex items-center">
+              <input type="checkbox" name="lgbtq" class="mr-2 rounded text-blue-600 focus:ring-blue-500" />
+              <i class="fas fa-rainbow mr-2 text-base-600"></i>
+              <label class="text-sm text-base-700">LGBTQ+</label>
+          </div>
+          <div class="flex items center">
+              <input type="checkbox" name="eh_gerente" class="mr-2 rounded text-blue-600 focus:ring-blue-500" />
+               <i class="fas fa-user-tie mr-2"></i>
+              <label for="eh_gerente" class="text-sm text-base-700">
+                Gerente
+              </label>
+          </div>
+        </div>
+    </div>
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+          <div class="flex items-center">
+            <input type="checkbox" name="eh_voluntario" id="eh_voluntario" class="h-5 w-5 text-blue-600 focus:ring-blue-500 mr-3" />
+            <label for="eh_voluntario" class="text-lg font-semibold text-blue-800 flex items-center">
+              <i class="fas fa-hands-helping mr-2"></i>
+              Quero ser Voluntário
+            </label>
+          </div>
+          <p class="text-sm text-blue-700 mt-2">
+            Marque esta caixa se deseja participar como voluntário em nossos projetos.
+          </p>
+        </div>
+
+       <div class="mt-6">
+          <button type="submit" id="btnSubmit" class="w-full rounded-lg bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
+            Criar Conta
+          </button>
+        </div>
+      </form>
+
+      <div class="pt-8 text-base font-semibold leading-7">
+        <div class="mt-4 text-center">
+          <p class="text-sm text-base-600">
+            Já tem uma conta?
+            <a href="/auth/login" class="text-blue-600 hover:underline">Entrar</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% block scripts %}
+ <script src="{{ url_for('static', path='js/user_register.js') }}" defer></script>
+{% endblock %}
+
+  {% endblock %}
+</div>

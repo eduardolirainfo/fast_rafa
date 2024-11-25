@@ -1,0 +1,53 @@
+{% extends "../base/layout.html" %} {% block title %}Watchlist{% endblock %} {%
+block content %}
+<div class="container mx-auto px-4">
+  <h1 class="text-2xl font-bold mb-4">Watchlist</h1>
+
+  <div class="bg-base-100 shadow-md rounded-lg p-6">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b">
+          <th class="py-2 text-left">Organização</th>
+          <th class="py-2 text-left">Usuário</th>
+          <th class="py-2 text-left">Endereço IP</th>
+          <th class="py-2 text-left">Quantidade</th>
+          <th class="py-2 text-left">Criado em</th>
+          <th class="py-2 text-left">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in watchlist_items %}
+        <tr class="border-b hover:bg-base-100">
+          <td class="py-2">{{ item.id_organizacao }}</td>
+          <td class="py-2">{{ item.id_usuario }}</td>
+          <td class="py-2">{{ item.endereco_ip }}</td>
+          <td class="py-2">{{ item.quantidade }}</td>
+          <td class="py-2">{{ item.criado_em }}</td>
+          <td class="py-2">
+            <a
+              href="/watchlist/edit/{{ item.id }}"
+              class="text-blue-600 hover:underline mr-2"
+              >Editar</a
+            >
+            <a
+              href="/watchlist/delete/{{ item.id }}"
+              class="text-red-600 hover:underline"
+              >Excluir</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-4">
+    <a
+      href="/watchlist/new"
+      class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+    >
+      Nova Entrada de Watchlist
+    </a>
+  </div>
+</div>
+{% endblock %}

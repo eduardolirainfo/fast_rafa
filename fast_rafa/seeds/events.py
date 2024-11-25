@@ -11,6 +11,7 @@ from fast_rafa.modules.events.models import Event
 from fast_rafa.modules.events.schemas import EventCreate
 from fast_rafa.modules.organizations.models import Organization
 from fast_rafa.modules.users.models import User
+from fast_rafa.utils.funcs import gerar_slug
 
 fake = Faker('pt_BR')
 logger = setup_logger()  # Inicializando o logger
@@ -50,6 +51,7 @@ async def criar_evento(
             'fechado': datetime.utcnow()
             + timedelta(days=fake.random_int(1, 10)),
             'titulo': fake.sentence(nb_words=4),
+            'slug': gerar_slug(fake.sentence(nb_words=4)),
             'descricao': fake.text(max_nb_chars=200),
             'data': datetime.utcnow()
             + timedelta(days=fake.random_int(10, 30)),
@@ -157,7 +159,11 @@ async def seed_events(session):
 
 
 async def undo_events(session):
-    session.execute('TRUNCATE events RESTART IDENTITY CASCADE;')
-    session.commit()
-
-    return 'Eventos removidos com sucesso!'
+    try:
+        session.query(Event).delete()
+        session.commit()
+        return 'Eventos deletados com sucesso!'
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f'Erro ao desfazer a seed de eventos: {str(e)}')
+        return f'Erro ao desfazer a seed de eventos: {str(e)}'

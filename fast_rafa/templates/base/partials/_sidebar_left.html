@@ -1,0 +1,77 @@
+<!-- Left Sidebar -->
+<div class="hidden md:block md:col-span-3">
+  <div class="bg-base-100 rounded-lg shadow-sm p-4 sticky top-20">
+    <h4 class="font-semibold mb-4">Sua Organização</h4>
+    <!-- User Profile Summary -->
+    {% if current_user is not none %}
+    <div class="flex items-center space-x-3 mb-4">
+      <div class="max-w-md w-full">
+        <div class="h-12 w-12 rounded-full overflow-hidden">
+          <img
+            src="{{ current_user.logo_organizacao or url_for('static', path='img/default-avatar.png') }}"
+            alt="Profile"
+            class="h-full w-full object-cover"
+          />
+        </div>
+        <h3 class="font-semibold truncate">
+          {{ current_user.organization.nome }}
+        </h3>
+        <p class="text-sm text-base-500 break-words">
+          {{ current_user.organization.email }}
+        </p>
+        <div class="mt-4">
+          <p class="text-sm text-base-500">
+            <strong>Telefone:</strong> {{ current_user.organization.telefone }}
+          </p>
+          <p class="text-sm text-base-500">
+            <strong>Endereço:</strong> {{ current_user.organization.rua }}, {{
+            current_user.organization.cidade }}, {{
+            current_user.organization.estado }}
+          </p>
+          <p class="text-sm text-base-500">
+            <strong>Aberto das</strong> {{ current_user.organization.abertura }}
+            - <strong> até:</strong> {{ current_user.organization.fechamento }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div class="text-center p-3 bg-base-50 rounded-lg">
+        <div class="font-bold text-xl text-blue-600">Doações</div>
+        <div class="text-sm text-base-500">Doações</div>
+      </div>
+      <div class="text-center p-3 bg-base-50 rounded-lg">
+        <div class="font-bold text-xl text-green-600">Ajudados</div>
+        <div class="text-sm text-base-500">Ajudados</div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="space-y-2">
+      <h4 class="font-semibold mb-2">Categorias</h4>
+      <ul class="space-y-2">
+        {% for category in categories %}
+        <li class="flex items-center space-x-2">
+          <a
+            class="p-2 btn btn-ghost hover:bg-transparent hover:text-base-400"
+            href="/categories/{{ category.slug }}"
+            class="flex items-center space-x-2 p-2 hover:bg-base-50 rounded-lg"
+          >
+            <img
+              src="{{ url_for('static', path='img/icons/' ~ category.icon) }}"
+              alt="{{ category.categoria }}"
+              class="text-base-400 category-icon"
+            />
+
+            <span>{{ category.categoria }}</span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>

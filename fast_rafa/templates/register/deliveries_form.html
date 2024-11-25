@@ -1,0 +1,162 @@
+{% extends "../base/layout.html" %}
+
+{% block title %}{% if delivery %}Editar{% else %}Criar{% endif %} Entrega{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 max-w-lg">
+    <h1 class="text-2xl font-bold mb-6">
+        {% if delivery %}Editar Entrega{% else %}Criar Nova Entrega{% endif %}
+    </h1>
+
+    <form method="POST" class="bg-base-100 shadow-md rounded-lg p-6">
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="entrega_direta">Tipo de Entrega</label>
+            <select
+                name="entrega_direta"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                required
+            >
+                <option value="true" {% if delivery and delivery.entrega_direta %}selected{% endif %}>Entrega Direta</option>
+                <option value="false" {% if delivery and not delivery.entrega_direta %}selected{% endif %}>Entrega Indireta</option>
+            </select>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="mb-4">
+                <label class="block text-base-700 mb-2" for="id_postagem">Postagem</label>
+                <select
+                    name="id_postagem"
+                    class="w-full bg-base-100 rounded-lg py-2 px-4"
+                    required
+                >
+                    {% for post in posts %}
+                    <option
+                        value="{{ post.id }}"
+                        {% if delivery and delivery.id_postagem == post.id %}selected{% endif %}
+                    >
+                        {{ post.titulo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-base-700 mb-2" for="id_usuario">Voluntário</label>
+                <select
+                    name="id_usuario"
+                    class="w-full bg-base-100 rounded-lg py-2 px-4"
+                    required
+                >
+                    {% for user in users %}
+                    <option
+                        value="{{ user.id }}"
+                        {% if delivery and delivery.id_usuario == user.id %}selected{% endif %}
+                    >
+                        {{ user.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="mb-4">
+                <label class="block text-base-700 mb-2" for="id_organizacao">Organização</label>
+                <select
+                    name="id_organizacao"
+                    class="w-full bg-base-100 rounded-lg py-2 px-4"
+                    required
+                >
+                    {% for org in organizations %}
+                    <option
+                        value="{{ org.id }}"
+                        {% if delivery and delivery.id_organizacao == org.id %}selected{% endif %}
+                    >
+                        {{ org.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-base-700 mb-2" for="id_ong">ONG</label>
+                <select
+                    name="id_ong"
+                    class="w-full bg-base-100 rounded-lg py-2 px-4"
+                    required
+                >
+                    {% for ong in ongs %}
+                    <option
+                        value="{{ ong.id }}"
+                        {% if delivery and delivery.id_ong == ong.id %}selected{% endif %}
+                    >
+                        {{ ong.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="mb-4">
+                <label class="block text-base-700 mb-2" for="data">Data</label>
+                <input
+                    type="date"
+                    name="data"
+                    value="{{ delivery.data.strftime('%Y-%m-%d') if delivery else '' }}"
+                    class="w-full bg-base-100 rounded-lg py-2 px-4"
+                    required
+                >
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-base-700 mb-2" for="hora">Hora</label>
+                <input
+                    type="time"
+                    name="hora"
+                    value="{{ delivery.hora if delivery else '' }}"
+                    class="w-full bg-base-100 rounded-lg py-2 px-4"
+                    required
+                >
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="completo">Progresso da Entrega (%)</label>
+            <input
+                type="number"
+                name="completo"
+                min="0"
+                max="100"
+                value="{{ delivery.completo if delivery else '0' }}"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                required
+            >
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="motivo_cancelamento">Motivo de Cancelamento (opcional)</label>
+            <textarea
+                name="motivo_cancelamento"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                rows="3"
+            >{{ delivery.motivo_cancelamento if delivery else '' }}</textarea>
+        </div>
+
+        <div class="flex justify-between items-center">
+            <button
+                type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+            >
+                {% if delivery %}Atualizar{% else %}Criar{% endif %}
+            </button>
+            <a
+                href="/deliveries"
+                class="text-base-600 hover:underline"
+            >
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

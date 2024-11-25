@@ -1,0 +1,63 @@
+{% extends "../base/layout.html" %} {% block title %}Entregas{% endblock %} {%
+block content %}
+<div class="container mx-auto px-4">
+  <h1 class="text-2xl font-bold mb-4">Entregas</h1>
+
+  <div class="bg-base-100 shadow-md rounded-lg p-6">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b">
+          <th class="py-2 text-left">ID Postagem</th>
+          <th class="py-2 text-left">Organização</th>
+          <th class="py-2 text-left">ONG</th>
+          <th class="py-2 text-left">Data</th>
+          <th class="py-2 text-left">Hora</th>
+          <th class="py-2 text-left">Status</th>
+          <th class="py-2 text-left">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for delivery in deliveries %}
+        <tr class="border-b hover:bg-base-100">
+          <td class="py-2">{{ delivery.id_postagem }}</td>
+          <td class="py-2">{{ delivery.organizations.nome }}</td>
+          <td class="py-2">{{ delivery.ongs.nome }}</td>
+          <td class="py-2">{{ delivery.data.strftime('%d/%m/%Y') }}</td>
+          <td class="py-2">{{ delivery.hora }}</td>
+          <td class="py-2">
+            {% if delivery.completo == 100 %}
+            <span class="text-green-600">Concluída</span>
+            {% elif delivery.completo > 0 %}
+            <span class="text-yellow-600">Em Andamento</span>
+            {% else %}
+            <span class="text-red-600">Pendente</span>
+            {% endif %}
+          </td>
+          <td class="py-2">
+            <a
+              href="/deliveries/{{ delivery.id }}"
+              class="text-blue-600 hover:underline mr-2"
+              >Detalhes</a
+            >
+            <a
+              href="/deliveries/edit/{{ delivery.id }}"
+              class="text-green-600 hover:underline"
+              >Editar</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-4">
+    <a
+      href="/deliveries/new"
+      class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+    >
+      Nova Entrega
+    </a>
+  </div>
+</div>
+{% endblock %}

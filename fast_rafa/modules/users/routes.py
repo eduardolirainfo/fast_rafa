@@ -1,11 +1,19 @@
+import os
 import re
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request,
+    UploadFile,
+)
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fast_rafa.core.database import get_session
+from fast_rafa.core.logger import setup_logger
 from fast_rafa.core.security import (
     get_current_user,
     get_password_hash,
@@ -37,33 +45,117 @@ from fast_rafa.utils.sel import check_related_models, get_by_sel
 
 router = APIRouter()
 
+UPLOAD_FOLDER = 'uploads/profile_images'
+
+
+def allowed_file(filename: str) -> bool:
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    return (
+        '.' in filename
+        and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
+
+
+def secure_filename(filename):
+    filename = re.sub(r'[^a-zA-Z0-9_.-]', '_', filename)
+    return filename
+
+
+logger = setup_logger()
+
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserResponse)
-def create_user(usuario: CreateUser, db: Session = Depends(get_session)):
+async def create_user(
+    request: Request,
+    db: Session = Depends(get_session),
+):
+    logger.info('Iniciando criação de usuário...')
+
+    form_data = await request.form()
+    usuario_data = dict(form_data)
+
+    telefone = usuario_data.get('telefone', '')
+    telefone = re.sub(r'\D', '', telefone)
+    padrao_telefone = r'^\+?(\d{1,2})?(\d{2,3})?[\d]{4,5}[\d]{4}$'
+
+    if not re.match(padrao_telefone, telefone):
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='Telefone inválido',
+        )
+
+    # Converter campos booleanos
+    for field in ['eh_deletado', 'eh_voluntario', 'eh_gerente']:
+        usuario_data[field] = form_data.get(field, 'off') == 'on'
+
+    # Converter id_organizacao para int
+    usuario_data['id_organizacao'] = int(usuario_data['id_organizacao'])
+
+    # Resto do seu código permanece igual
     organizacao = get_by_sel(
         db,
         Organization,
-        filters={
-            'filter_plus': {'id': usuario.id_organizacao},
-        },
+        filters={'filter_plus': {'id': usuario_data['id_organizacao']}},
     ).first()
 
     if not organizacao:
+        logger.error(
+            f'Organização com ID {usuario_data["id_organizacao"]} não encontrada.'
+        )
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail=get_not_found_message('Organização'),
         )
 
-    senha_hash = get_password_hash(usuario.senha_hash)
-    novo_usuario_data = usuario.dict()
-    novo_usuario_data['senha_hash'] = senha_hash
-    novo_usuario = User.create(CreateUser(**novo_usuario_data))
+    senha_hash = get_password_hash(usuario_data['senha_hash'])
+    usuario_data['senha_hash'] = senha_hash
+
+    url_imagem_perfil = form_data.get('url_imagem_perfil')
+    imagem_perfil: UploadFile = form_data.get('imagem_perfil')
+
+    print(' - url_imagem_perfil:', url_imagem_perfil)
+    print(' - imagem_perfil:', imagem_perfil)
+
+    if imagem_perfil and imagem_perfil.filename and not url_imagem_perfil:
+        if not allowed_file(imagem_perfil.filename):
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail='Formato de arquivo não permitido',
+            )
+
+        filename = secure_filename(imagem_perfil.filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+        if not os.path.exists(UPLOAD_FOLDER):
+            os.makedirs(UPLOAD_FOLDER)
+
+        # se imagem não existir, salvar
+        if not os.path.exists(filepath):
+            with open(filepath, 'wb') as f:
+                f.write(imagem_perfil.file.read())
+
+        usuario_data['url_imagem_perfil'] = filepath
+    elif url_imagem_perfil:
+        usuario_data['url_imagem_perfil'] = url_imagem_perfil
+    else:
+        usuario_data['url_imagem_perfil'] = None
+
+    logger.info('Criando objeto do novo usuário...')
+    novo_usuario = User.create(CreateUser(**usuario_data))
+
     try:
+        logger.info(
+            f'Adicionando novo usuário ao banco de dados: {usuario_data}'
+        )
         db.add(novo_usuario)
         db.commit()
         db.refresh(novo_usuario)
+        logger.info(f'Usuário criado com sucesso: ID {novo_usuario.id}')
     except IntegrityError as e:
         db.rollback()
+        logger.error(
+            'Erro de integridade durante a criação do usuário.', exc_info=True
+        )
         error_message = str(e.orig)
 
         match = re.search(
@@ -71,11 +163,13 @@ def create_user(usuario: CreateUser, db: Session = Depends(get_session)):
         )
         if match:
             field_name = match.group(1).replace('_', ' ').capitalize()
+            logger.warning(f'Conflito de campo único: {field_name}')
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
                 detail=get_conflict_message(field_name),
             )
         else:
+            logger.critical('Erro inesperado durante a criação do usuário.')
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 detail=get_creation_error_message('usuário'),

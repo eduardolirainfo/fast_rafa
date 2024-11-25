@@ -1,0 +1,86 @@
+{% extends "../base/layout.html" %}
+
+{% block title %}{% if watchlist %}Editar{% else %}Criar{% endif %} Watchlist{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 max-w-md">
+    <h1 class="text-2xl font-bold mb-6">
+        {% if watchlist %}Editar Watchlist{% else %}Criar Nova Watchlist{% endif %}
+    </h1>
+
+    <form method="POST" class="bg-base-100 shadow-md rounded-lg p-6">
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="id_organizacao">Organização</label>
+            <select
+                name="id_organizacao"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                required
+            >
+                {% for org in organizations %}
+                <option
+                    value="{{ org.id }}"
+                    {% if watchlist and watchlist.id_organizacao == org.id %}selected{% endif %}
+                >
+                    {{ org.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="id_usuario">Usuário</label>
+            <select
+                name="id_usuario"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                required
+            >
+                {% for user in users %}
+                <option
+                    value="{{ user.id }}"
+                    {% if watchlist and watchlist.id_usuario == user.id %}selected{% endif %}
+                >
+                    {{ user.primeiro_nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="endereco_ip">Endereço IP</label>
+            <input
+                type="text"
+                name="endereco_ip"
+                value="{{ watchlist.endereco_ip if watchlist else '' }}"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                required
+            >
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-base-700 mb-2" for="quantidade">Quantidade</label>
+            <input
+                type="number"
+                name="quantidade"
+                value="{{ watchlist.quantidade if watchlist else '' }}"
+                class="w-full bg-base-100 rounded-lg py-2 px-4"
+                required
+            >
+        </div>
+
+        <div class="flex justify-between items-center">
+            <button
+                type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+            >
+                {% if watchlist %}Atualizar{% else %}Criar{% endif %}
+            </button>
+            <a
+                href="/watchlist"
+                class="text-base-600 hover:underline"
+            >
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

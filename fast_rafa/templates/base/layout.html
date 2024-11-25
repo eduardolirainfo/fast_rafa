@@ -1,46 +1,88 @@
 <!DOCTYPE html>
-<html lang="pt" data-theme="light">
+<html lang="pt-br" data-theme="light">
   <head>
-    {% block head %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Rede de Doações{% endblock %}</title>
+
+    <style type="text/css">
+      .category-icon {
+        width: 50px;
+        height: 50px;
+        transition: transform 0.3s ease;
+      }
+      .category-icon:hover {
+        transform: scale(1.1);
+      }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+<script src="https://cdn.tailwindcss.com"></script>
+     <link rel="stylesheet" href="{{url_for('static', path='css/output.css')}}" />
+
     <link
       rel="stylesheet"
-      type="text/css"
-      href="{{ url_for('static', path='/css/output.css') }}"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <title>{% block title %}{% endblock %} - To-Do List</title>
-    {% endblock %}
   </head>
   <body>
-    <header class="fixed z-20 w-full backdrop-blur-md">
-      {% include 'base/partials/_navbar.html' %}
-    </header>
-    <br />
+    {% include 'base/partials/_navbar.html' %}
 
-    <main class="container mx-auto max-w-4xl mt-20 flex justify-center">
-      {% block content %} {% endblock %}
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 mt-20 md:mt-16 mb-16">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 py-8 md:py-0">
+        {% if current_user %} {% include 'base/partials/_sidebar_left.html' %}
+          <div class="md:col-span-6 space-y-4">
+        {% else %}
+          <div class="md:col-span-12 space-y-4">
+        {% endif %}
+          {% block content %}{% endblock %}
+        </div>
+        {% if current_user %} {% include 'base/partials/_sidebar_right.html' %}
+        {% endif %}
+      </div>
     </main>
-    <footer
-      class="container mx-auto max-w-4xl mt-20 text-center text-neutral glass"
-    >
-      {% block footer %}
-      <p class="text-sm">
-        © 2024 To-Do List - Criado por
-        <a
-          href="https://github.com/eduardolirainfo"
-          target="_blank"
-          class="text-primary"
-          >Eduardo Lira</a
-        >
-      </p>
 
-      <br />
-      {% endblock %}
-    </footer>
+    <!-- Mobile Navigation Bar -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-base-100 border-t z-50">
+      <div class="grid grid-cols-5 gap-1">
+        <a
+          href="/"
+          class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600"
+        >
+          <i class="fas fa-home text-xl"></i>
+          <span class="text-xs mt-1">Home</span>
+        </a>
+        <a
+          href="/explore"
+          class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600"
+        >
+          <i class="fas fa-compass text-xl"></i>
+          <span class="text-xs mt-1">Explorar</span>
+        </a>
+        <a
+          href="/new-post"
+          class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600"
+        >
+          <i class="fas fa-plus-circle text-xl"></i>
+          <span class="text-xs mt-1">Doar</span>
+        </a>
+        <a
+          href="/notifications"
+          class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600"
+        >
+          <i class="fas fa-bell text-xl"></i>
+          <span class="text-xs mt-1">Notificações</span>
+        </a>
+        <a
+          href="/profile"
+          class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600"
+        >
+          <i class="fas fa-user text-xl"></i>
+          <span class="text-xs mt-1">Perfil</span>
+        </a>
+      </div>
+    </nav>
+
 
     <script>
       const themeController = document.querySelector(".theme-controller");

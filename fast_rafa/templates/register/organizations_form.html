@@ -1,0 +1,63 @@
+{% extends "layout.html" %} {% block title %}{% if organization %}Editar{% else
+%}Criar{% endif %} Organização{% endblock %} {% block content %}
+<div class="container mx-auto px-4 max-w-lg">
+  <h1 class="text-2xl font-bold mb-6">
+    {% if organization %}Editar Organização{% else %}Criar Nova Organização{%
+    endif %}
+  </h1>
+
+  <form method="POST" class="bg-base-100 shadow-md rounded-lg p-6">
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="mb-4">
+        <label class="block text-base-700 mb-2" for="nome">Nome</label>
+        <input
+          type="text"
+          name="nome"
+          value="{{ organization.nome if organization else '' }}"
+          class="w-full bg-base-100 rounded-lg py-2 px-4"
+          required
+        />
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-base-700 mb-2" for="id_federal"
+          >ID Federal</label
+        >
+        <input
+          type="text"
+          name="id_federal"
+          value="{{ organization.id_federal if organization else '' }}"
+          class="w-full bg-base-100 rounded-lg py-2 px-4"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-base-700 mb-2" for="descricao">Descrição</label>
+      <textarea
+        name="descricao"
+        class="w-full bg-base-100 rounded-lg py-2 px-4"
+        rows="4"
+        required
+      >
+{{ organization.descricao if organization else '' }}</textarea
+      >
+    </div>
+
+    <!-- Outros campos similares podem ser adicionados -->
+
+    <div class="flex justify-between items-center">
+      <button
+        type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+      >
+        {% if organization %}Atualizar{% else %}Criar{% endif %}
+      </button>
+      <a href="/organizations" class="text-base-600 hover:underline">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

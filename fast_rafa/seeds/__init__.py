@@ -1,4 +1,5 @@
 from .categories import seed_categories, undo_categories
+from .categories_main import seed_categories_main, undo_categories_main
 from .events import seed_events, undo_events
 from .organizations import seed_organizations, undo_organizations
 from .posts import seed_posts, undo_posts
@@ -7,6 +8,11 @@ from .users import seed_users, undo_users
 
 class Seed:
     @staticmethod
+    async def seed_categories_main(session):
+        """Insere categorias principais."""
+        await seed_categories_main(session)
+        return 'Categorias principais incluídas com sucesso!'
+
     async def seed_categories(session):
         """Insere categorias iniciais."""
         await seed_categories(session)
@@ -47,6 +53,13 @@ class Seed:
             return result
 
     @staticmethod
+    async def undo_categories_main(session):
+        """Reverte categorias principais."""
+        result = await undo_categories_main(session)
+        if result:
+            return result
+
+    @staticmethod
     async def undo_organizations(session):
         """Reverte organizações."""
         result = await undo_organizations(session)
@@ -77,6 +90,7 @@ class Seed:
     @staticmethod
     async def seed_all(session):
         """Insere todos os dados iniciais."""
+        await Seed.seed_categories_main(session)
         await Seed.seed_categories(session)
         await Seed.seed_organizations(session)
         await Seed.seed_users(session)
@@ -88,6 +102,7 @@ class Seed:
     async def undo_all(session):
         """Reverte todos os dados iniciais."""
         await Seed.undo_categories(session)
+        await Seed.undo_categories_main(session)
         await Seed.undo_organizations(session)
         await Seed.undo_users(session)
         await Seed.undo_posts(session)

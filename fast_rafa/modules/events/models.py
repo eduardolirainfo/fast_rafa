@@ -25,6 +25,7 @@ class Event:
     )
     fechado: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     titulo: Mapped[str] = mapped_column(String(50), nullable=False)
+    slug: Mapped[str] = mapped_column(String(50), nullable=False)
     descricao: Mapped[str] = mapped_column(String(255), nullable=False)
     data: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     url_imagem: Mapped[Optional[str]] = mapped_column(

@@ -9,6 +9,7 @@ class EventCreate(BaseModel):
     id_usuario: int
     fechado: datetime
     titulo: str
+    slug: Optional[str] = None
     descricao: str
     data: datetime
     url_imagem: Optional[str]
@@ -19,6 +20,7 @@ class EventUpdateRequest(BaseModel):
     id_usuario: Optional[int]
     fechado: Optional[datetime]
     titulo: Optional[str]
+    slug: Optional[str]
     descricao: Optional[str]
     data: Optional[datetime]
     url_imagem: Optional[str]
@@ -38,6 +40,7 @@ class EventResponse(BaseModel):
     id_usuario: int
     fechado: datetime
     titulo: str
+    slug: Optional[str]
     descricao: str
     data: datetime
     url_imagem: Optional[str] = ''
@@ -55,6 +58,7 @@ class EventResponse(BaseModel):
             id_usuario=evento.id_usuario,
             fechado=evento.fechado,
             titulo=evento.titulo,
+            slug=evento.slug,
             descricao=evento.descricao,
             data=evento.data,
             url_imagem=url_imagem,
@@ -71,6 +75,7 @@ class EventResponse(BaseModel):
             id_usuario=evento.id_usuario,
             fechado=evento.fechado,
             titulo=evento.titulo,
+            slug=evento.slug,
             descricao=evento.descricao,
             data=evento.data,
             url_imagem=url_imagem,

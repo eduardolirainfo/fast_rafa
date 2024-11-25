@@ -1,0 +1,73 @@
+{% extends "../base/layout.html" %} {% block title %}Organizações{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4">
+  <h1 class="text-2xl font-bold mb-4">Organizações</h1>
+
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for org in organizations %}
+    <div class="bg-base-100 shadow-md rounded-lg p-6">
+      <div class="flex items-center mb-4">
+        <img
+          src="{{ org.url_logo }}"
+          alt="{{ org.nome }}"
+          class="w-16 h-16 rounded-full mr-4"
+        />
+        <div>
+          <h2 class="text-xl font-semibold">{{ org.nome }}</h2>
+          <p class="text-base-600">{{ org.cidade }}, {{ org.estado }}</p>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <p class="text-base-700">{{ org.descricao }}</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <p class="text-sm text-base-500">Telefone</p>
+          <p>{{ org.telefone }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-base-500">Email</p>
+          <p>{{ org.email }}</p>
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-between">
+        <a
+          href="/organizations/{{ org.id }}"
+          class="text-blue-600 hover:underline"
+        >
+          Ver Detalhes
+        </a>
+        {% if current_user.eh_gerente %}
+        <div>
+          <a
+            href="/organizations/edit/{{ org.id }}"
+            class="text-green-600 hover:underline mr-2"
+            >Editar</a
+          >
+          <a
+            href="/organizations/delete/{{ org.id }}"
+            class="text-red-600 hover:underline"
+            >Excluir</a
+          >
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if current_user.eh_gerente %}
+  <div class="mt-6">
+    <a
+      href="/organizations/new"
+      class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+    >
+      Adicionar Nova Organização
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -10,6 +10,11 @@ async def run_seed_all(session):
     print(result)
 
 
+async def run_seed_categories_main(session):
+    result = await Seed.seed_categories_main(session)
+    print(result)
+
+
 async def run_seed_categories(session):
     result = await Seed.seed_categories(session)
     print(result)
@@ -54,6 +59,8 @@ async def run_task_seed():
         await run_seed_all(session)
     elif command == 'organizations':
         await run_seed_organizations(session)
+    elif command == 'categories_main':
+        await run_seed_categories_main(session)
     elif command == 'categories':
         await run_seed_categories(session)
     elif command == 'events':
