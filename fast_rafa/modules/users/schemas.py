@@ -1,4 +1,5 @@
 import enum
+import re
 from datetime import date, datetime
 from typing import Optional
 
@@ -14,6 +15,100 @@ class SexoEnum(str, enum.Enum):
     FEMININO = 'F'
     OUTRO = 'O'
     NAO_INFORMADO = 'NI'
+
+
+class TelefoneValidator:
+    valid_ddds = [
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19',
+        '21',
+        '22',
+        '24',
+        '27',
+        '28',
+        '31',
+        '32',
+        '33',
+        '34',
+        '35',
+        '37',
+        '38',
+        '41',
+        '42',
+        '43',
+        '44',
+        '45',
+        '46',
+        '47',
+        '48',
+        '49',
+        '51',
+        '52',
+        '53',
+        '54',
+        '55',
+        '61',
+        '62',
+        '63',
+        '64',
+        '65',
+        '66',
+        '67',
+        '68',
+        '69',
+        '71',
+        '73',
+        '74',
+        '75',
+        '77',
+        '79',
+        '81',
+        '82',
+        '83',
+        '84',
+        '85',
+        '86',
+        '87',
+        '88',
+        '89',
+        '91',
+        '92',
+        '93',
+        '94',
+        '95',
+        '96',
+        '97',
+        '98',
+        '99',
+    ]
+
+    @staticmethod
+    def validate(value: str) -> str:
+        telefone_sem_mascara = re.sub(r'\D', '', value)
+        monze = 11
+
+        if len(telefone_sem_mascara) != monze:
+            raise ValueError('O número de telefone deve conter 11 dígitos.')
+
+        numero_sem_ddd = telefone_sem_mascara[2:]
+
+        if numero_sem_ddd == '0' * len(numero_sem_ddd):
+            raise ValueError(
+                'O número de telefone não pode ser composto apenas por zeros.'
+            )
+
+        ddd = telefone_sem_mascara[:2]
+        if ddd not in TelefoneValidator.valid_ddds:
+            raise ValueError(f'O DDD {ddd} não é válido.')
+
+        return value
 
 
 class CreateUser(BaseModel):
@@ -46,6 +141,16 @@ class CreateUser(BaseModel):
                 )
         return value
 
+    # @validator('telefone', pre=True, always=True)
+    # def sanitize_phone(cls, value: str) -> str:
+    #     if value:
+    #         return re.sub(r'\D', '', value)
+    #     return value
+
+    @validator('telefone')
+    def validate_telefone_field(cls, value):
+        return TelefoneValidator.validate(value)
+
 
 class UpdateUserRequest(BaseModel):
     id_organizacao: Optional[int] = None
@@ -63,8 +168,14 @@ class UpdateUserRequest(BaseModel):
     deficiencia_cognitiva: Optional[bool] = None
     lgbtq: Optional[bool] = None
     url_imagem_perfil: Optional[str] = None
-    aniversario: Optional[date] = None  # Novo campo de aniversário
-    sexo: Optional[SexoEnum] = None  # Novo campo de sexo
+    aniversario: Optional[date] = None
+    sexo: Optional[SexoEnum] = None
+
+    @validator('telefone', always=True)
+    def validate_telefone_field(cls, value):
+        if value:
+            return TelefoneValidator.validate(value)
+        return value
 
 
 class CreateUserResponse(BaseModel):
@@ -80,12 +191,18 @@ class UserResponse(BaseModel):
     primeiro_nome: str
     sobrenome: str
     email: str
-    url_imagem_perfil: str = ''
-    image_perfil_base64: Optional[str] = None
-    id_organizacao: Optional[int] = None
+    telefone: Optional[str] = None
+    url_imagem_perfil: Optional[str] = None
+    id_organizacao: Optional[int]
     eh_deletado: bool
     eh_voluntario: bool
     eh_gerente: bool
+    lgbtq: Optional[bool] = None
+    deficiencia_auditiva: Optional[bool] = None
+    deficiencia_cognitiva: Optional[bool] = None
+    usa_cadeira_rodas: Optional[bool] = None
+    aniversario: Optional[date] = None
+    sexo: Optional[SexoEnum] = None
 
     @classmethod
     def from_home(cls, usuario):
@@ -130,26 +247,15 @@ class UserResponse(BaseModel):
             url_imagem_perfil=url_imagem,
         )
 
-
-# class UserService:
-#     @staticmethod
-#     def convert_user_image(user):
-#         if (
-#             user and user.url_imagem_perfil
-#         ):  # ajuste para o nome do seu campo BLOB
-#             try:
-#                 image_perfil_base64 = base64.b64encode(
-#                     user.url_imagem_perfil
-#                 ).decode('utf-8')
-#                 user.image_perfil_base64 = (
-#                     image_perfil_base64  # adiciona novo atributo ao user
-#                 )
-#             except Exception as e:
-#                 logger.error(f'Erro ao converter imagem: {e}')
-#                 user.image_perfil_base64 = None
-#         else:
-#             user.image_perfil_base64 = None
-#         return user
+    @validator('telefone', pre=False, always=True)
+    def format_phone(cls, value: Optional[str]) -> Optional[str]:
+        mdez = 10
+        monze = 11
+        if value and len(value) == monze:
+            return f'({value[:2]}) {value[2:7]}-{value[7:]}'
+        elif value and len(value) == mdez:
+            return f'({value[:2]}) {value[2:6]}-{value[6:]}'
+        return value
 
 
 class UpdateUserResponse(UserResponse):

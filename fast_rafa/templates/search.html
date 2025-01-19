@@ -1,0 +1,51 @@
+<div class="search-results">
+  {% if query %}
+  <h2>Resultados para "{{ query }}"</h2>
+  {% else %}
+  <h2>Digite algo para começar a busca</h2>
+  {% endif %}
+
+  {% if posts %}
+  <div class="posts">
+    <h3>Posts encontrados:</h3>
+    <ul>
+      {% for post in posts %}
+      <li>{{ post.title }} - {{ post.content }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if organizations %}
+  <div class="organizations">
+    <h3>Organizações encontradas:</h3>
+    <ul>
+      {% for organization in organizations %}
+      <li>{{ organization.name }} - {{ organization.description }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if categories %}
+  <div class="categories">
+    <h3>Categorias encontradas:</h3>
+    <ul>
+      {% for category in categories %}
+      <li>{{ category.name }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if events %}
+  <div class="events">
+    <h3>Eventos encontrados:</h3>
+    <ul>
+      {% for event in events %}
+      <li>{{ event.name }} - {{ event.date }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</div>

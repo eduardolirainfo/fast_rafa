@@ -99,7 +99,7 @@ def read_calendar_by_id(calendar_id: int, db: Session = Depends(get_session)):
 
 
 @router.get(
-    '/organization/{organization_id}',
+    '/organizations/{organization_id}',
     response_model=List[Calendar],
     status_code=HTTPStatus.OK,
 )

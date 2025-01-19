@@ -13,6 +13,42 @@ from fast_rafa.utils.funcs import generate_unique_url
 fake = Faker('pt_BR')
 logger = setup_logger()
 
+cidades_rio = [
+    'Rio de Janeiro',
+    'Niterói',
+    'São Gonçalo',
+    'Duque de Caxias',
+    'Nova Iguaçu',
+    'Petrópolis',
+    'Volta Redonda',
+    'Macaé',
+    'Campos dos Goytacazes',
+    'Angra dos Reis',
+    'Cabo Frio',
+    'Resende',
+    'Teresópolis',
+    'Belford Roxo',
+    'Itaboraí',
+    'São João de Meriti',
+    'Barra Mansa',
+    'Queimados',
+    'Araruama',
+    'Nilópolis',
+    'Maricá',
+    'Rio das Ostras',
+    'Seropédica',
+    'Valença',
+    'Itaguaí',
+    'Paracambi',
+    'São Pedro da Aldeia',
+    'Rio Bonito',
+    'Magé',
+    'Saquarema',
+    'Japeri',
+    'Mangaratiba',
+    'Paraty',
+]
+
 
 def gen_random_time():
     hour = fake.random_int(min=0, max=23)
@@ -70,8 +106,8 @@ async def seed_organizations(session):
                     'descricao': fake.text(max_nb_chars=200),
                     'rua': fake.street_name(),
                     'cep': fake.postcode(),
-                    'cidade': fake.city(),
-                    'estado': fake.state(),
+                    'cidade': fake.random_element(cidades_rio),
+                    'estado': 'Rio de Janeiro',
                     'telefone': fake.phone_number(),
                     'email': fake.unique.email(),
                     'criado_em': datetime.utcnow(),

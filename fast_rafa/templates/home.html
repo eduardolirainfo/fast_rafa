@@ -1,21 +1,51 @@
 {% extends "base/layout.html" %} {% block title %} Rede de Doações {% endblock
 %} {% block content %}
-<!-- New Post Card -->
+<div
+  id="mensagem-feedback"
+  class="fixed top-32 right-4 left-4 sm:left-auto max-w-sm z-50"
+  style="display: none"
+>
+  <div class="bg-base-100 border-l-4 p-4 shadow-md rounded-md">
+    <div class="flex items-center">
+      <div class="flex-shrink-0">
+        <i
+          id="icone-feedback"
+          class="fas fa-check-circle text-green-500 text-xl"
+        ></i>
+      </div>
+      <div class="ml-3">
+        <p id="texto-feedback" class="text-sm font-medium"></p>
+      </div>
+      <div class="ml-auto pl-3">
+        <div class="-mx-1.5 -my-1.5">
+          <button
+            onclick="document.getElementById('mensagem-feedback').style.display = 'none'"
+            class="text-base-400 hover:text-base-500"
+          >
+            <span class="sr-only">Fechar</span>
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% if current_user is not none %}
-<form action="/post" method="POST" enctype="multipart/form-data">
+<form action="/posts" method="POST" enctype="multipart/form-data">
   <div class="bg-base-100 rounded-lg shadow-sm p-4">
-    <!-- Campo para a imagem do perfil -->
     <div class="flex space-x-4">
+      {% if current_user.url_imagem_perfil %}
       <img
-        src="{{ url_for('static',  path=current_user.url_imagem_perfil) }}"
+        src="{{ url_for('static', path=current_user.url_imagem_perfil) }}"
         alt="Profile"
         class="h-10 w-10 rounded-full"
       />
+      {% endif %}
 
-      <!-- Campo de descrição -->
       <textarea
+        id="post-content"
         name="descricao"
-        class="flex-1 px-4 text-left"
+        class="flex-1 px-4 py-2"
         placeholder="O que está acontecendo?"
         rows="3"
         style="resize: none; background: none; border: none; outline: none"
@@ -23,58 +53,31 @@
       ></textarea>
     </div>
 
-    <!-- Campos adicionais -->
-    <div class="grid grid-cols-1 gap-4 mt-4">
-      <input
-        type="text"
-        name="titulo"
-        placeholder="Título do post"
-        class="input w-full px-4 py-2 border rounded-md"
-        required
-      />
-      <input
-        type="number"
-        name="quantidade"
-        placeholder="Quantidade"
-        class="input w-full px-4 py-2 border rounded-md"
-        required
-      />
-      <select
-        name="id_categoria"
-        class="input w-full px-4 py-2 border rounded-md"
-        required
+ <div id="video-preview" class="card glass">
+  </div>
+
+    <div id="image-preview" class="mt-4"></div>
+
+    <div class="mt-4 flex space-x-2">
+      <button
+        id="media-button"
+        type="button"
+        class="btn btn-ghost flex items-center space-x-2"
       >
-        <option value="">Selecione a categoria</option>
-        <!-- Adicione opções dinamicamente -->
-        {% for categoria in categories %}
-        <option value="{{ categoria.id }}" class="{{ categoria.slug }} select select-primary w-full max-w-xs">
-        {{ categoria.categoria }}
-        </option>
-        {% endfor %}
-      </select>
+        <i class="fas fa-camera"></i>
+        <span>Selecionar Mídia</span>
+      </button>
       <input
-        type="date"
-        name="data_validade"
-        class="input w-full px-4 py-2 border rounded-md"
+        type="file"
+        id="image-input"
+        class="hidden"
+        accept="image/*"
       />
     </div>
 
-    <!-- Botões -->
+
+
     <div class="flex justify-between mt-4 pt-2 border-t">
-      <div class="flex space-x-4">
-        <button type="button" class="flex items-center space-x-2">
-          <i class="fas fa-image"></i>
-          <span>Foto</span>
-        </button>
-        <button type="button" class="flex items-center space-x-2">
-          <i class="fas fa-video"></i>
-          <span>Vídeo</span>
-        </button>
-        <button type="button" class="flex items-center space-x-2">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>Local</span>
-        </button>
-      </div>
       <button type="submit" class="btn btn-primary px-4 py-2 rounded-full">
         Postar
       </button>
@@ -82,63 +85,164 @@
   </div>
 </form>
 
+
 {% endif %}
 
-<!-- Posts Feed -->
+{% include 'base/partials/_post_list.html' %}
 
-{% if posts %} {% for post in posts %}
-<div class="card">
- <div class="card-inner">
-    <div class="box">
-      <div class="imgBox">
-       {% if post.url_imagem_post %}
-        <img
-          src="{{ post.url_imagem_post }}" alt="Post image" class="w-full h-48 object-cover rounded-lg"
-          alt="{{ post.titulo }}"
-        />
-        {% endif %}
-      </div>
-      <div class="icon">
-        <a class="iconBox {{post.categories.slug}}" href="/post/{{ post.id }}">
-            <i class="fas fa-arrow-right"></i>
-        </a>
-      </div>
-    </div>
-  </div>
-  <div class="content">
-    <h3>{{ post.titulo }}</h3>
-    <p>
-      {{ post.descricao }}
-    </p>
-    <ul>
+{% block scripts %}
+<script src="{{ url_for('static', path='js/img_post_preview.js') }}" defer></script>
+<script src="{{ url_for('static', path='js/action_like.js') }}" defer></script>
 
-    <li
-      class="{{ post.categories.slug }}">
-      {{ post.categories.categoria }}
-    </li>
+<script>
+  const postContent = document.getElementById('post-content');
+  const videoPreview = document.getElementById('video-preview');
+  const imagePreview = document.getElementById('image-preview');
+  const imageInput = document.getElementById('image-input');
+  const mediaButton = document.getElementById('media-button');
 
-    </ul>
-    <div class="flex items-end space-x-4 mt-4">
-      <button class="flex items-end space-x-1">
-        <i class="far fa-heart"></i>
-        <span>{{ post.likes_count }}</span>
-      </button>
-      <button class="flex items-end space-x-1">
-        <i class="far fa-comment"></i>
-        <span>{{ post.comments_count }}</span>
-      </button>
-      <button class="flex items-end space-x-1">
-        <i class="far fa-share-square"></i>
-      </button>
-    </div>
-  </div>
+  let imageSelected = false;
+
+  mediaButton.addEventListener('click', () => {
+    imageInput.click();
+  });
+
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      imageSelected = true;
+
+      imagePreview.innerHTML = '';
+
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.alt = 'Imagem selecionada';
+      img.className = 'w-full h-auto rounded-lg mb-2';
+
+      const removeButton = document.createElement('button');
+      removeButton.textContent = '✕';
+      removeButton.className =
+        'absolute top-2 right-2 bg-red-500 text-white rounded-full';
+      removeButton.onclick = () => {
+        img.remove();
+        removeButton.remove();
+        imageInput.value = '';
+        imageSelected = false;
+        imagePreview.innerHTML = '';
+
+        if (postContent.value && !imageSelected) {
+          displayVideoContent(postContent.value);
+        }
+      };
+
+      const container = document.createElement('div');
+      container.className = 'relative inline-block image-container';
+      container.appendChild(img);
+      container.appendChild(removeButton);
+
+      imagePreview.appendChild(container);
+
+      videoPreview.innerHTML = '';
+    }
+  });
+
+  let debounceTimeout;
+
+  postContent.addEventListener('input', () => {
+    clearTimeout(debounceTimeout);
+
+    debounceTimeout = setTimeout(() => {
+      if (imageSelected) return;
+
+      const content = postContent.value;
+      const youtubeUrlRegex = /https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+/g;
+
+      videoPreview.innerHTML = '';
+
+      let match;
+      while ((match = youtubeUrlRegex.exec(content)) !== null) {
+        const videoUrl = match[0];
+        const videoIdMatch = videoUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (!videoIdMatch) continue;
+
+        const videoId = videoIdMatch[1];
+
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+        iframe.className = 'w-full aspect-video rounded-lg mb-2';
+        iframe.allow =
+          'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+
+        const removeButton = document.createElement('button');
+        removeButton.textContent = '✕';
+        removeButton.className =
+          'absolute top-2 right-2 bg-red-500 text-white rounded-full';
+        removeButton.onclick = () => {
+          iframe.remove();
+          removeButton.remove();
+
+          const updatedContent = postContent.value.replace(videoUrl, '').trim();
+          postContent.value = updatedContent;
+
+          postContent.dispatchEvent(new Event('input'));
+        };
+
+        const container = document.createElement('div');
+        container.className = 'relative inline-block video-container';
+        container.appendChild(iframe);
+        container.appendChild(removeButton);
+
+        videoPreview.appendChild(container);
+      }
+    }, 2000);
+  });
+
+  function displayVideoContent(content) {
+    const youtubeUrlRegex = /https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+/g;
+
+    videoPreview.innerHTML = '';
+
+    let match;
+    while ((match = youtubeUrlRegex.exec(content)) !== null) {
+      const videoUrl = match[0];
+      const videoIdMatch = videoUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (!videoIdMatch) continue;
+
+      const videoId = videoIdMatch[1];
+
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${videoId}`;
+      iframe.className = 'w-full aspect-video rounded-lg mb-2';
+      iframe.allow =
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+
+      const removeButton = document.createElement('button');
+      removeButton.textContent = '✕';
+      removeButton.className =
+        'absolute top-2 right-2 bg-red-500 text-white rounded-full';
+      removeButton.onclick = () => {
+        iframe.remove();
+        removeButton.remove();
+
+        const updatedContent = postContent.value.replace(videoUrl, '').trim();
+        postContent.value = updatedContent;
+
+        postContent.dispatchEvent(new Event('input'));
+      };
+
+      const container = document.createElement('div');
+      container.className = 'relative inline-block video-container';
+      container.appendChild(iframe);
+      container.appendChild(removeButton);
+
+      videoPreview.appendChild(container);
+    }
+  }
+</script>
 
 
-   </div>
-
-  {% endfor %} {% else %}
-  <div class="bg-base-100 rounded-lg shadow-sm p-4">
-    <h4 class="font-semibold text-center">Nenhuma postagem encontrada</h4>
-  </div>
-  {% endif %} {% endblock %}
+{% endblock %}
+{% endblock %}
 </div>

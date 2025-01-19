@@ -1,11 +1,14 @@
-<!-- Search Bar - Desktop -->
-<div class="hidden md:block flex-1 max-w-xl mx-4">
+<div class="hidden md:block flex-1 max-w-lg mx-4">
   <div class="relative">
-    <input
-      type="text"
-      placeholder="Buscar doações..."
-      class="w-full bg-base-100 rounded-full py-2 px-4 pl-10"
-    />
-    <i class="fas fa-search absolute left-3 top-3 text-base-400"></i>
+    <form action="/search" method="get">
+      <input
+        type="text"
+        name="query"
+        placeholder="Buscar doações..."
+        class="w-full bg-base-100 rounded-full py-2 px-4 pl-10"
+        value="{{ query }}"
+      />
+      <i class="fas fa-search absolute left-3 top-3 text-base-400"></i>
+    </form>
   </div>
 </div>

@@ -33,215 +33,6 @@ function validatePhone(event) {
     }
 }
 
-// document.addEventListener('DOMContentLoaded', function() {
-
-//     const form = document.getElementById('formRegistro');
-//     const feedbackElement = document.getElementById('mensagem-feedback');
-//     const feedbackText = document.getElementById('texto-feedback');
-//     const feedbackIcon = document.getElementById('icone-feedback');
-//     const voluntarioCheckbox = document.getElementById('eh_voluntario');
-//     let feedbackTimeout;
-
-
-//     const phoneInput = document.querySelector('input[name="telefone"]');
-//     if (phoneInput) {
-//         phoneInput.addEventListener('input', maskPhone);
-//         phoneInput.addEventListener('keydown', validatePhone);
-
-//         // Adiciona placeholder para indicar o formato
-//         phoneInput.setAttribute('placeholder', '(99) 99999-9999');
-
-//         // Limita o tamanho máximo
-//         phoneInput.setAttribute('maxlength', '15');
-//     }
-
-//     // Substituir o input de URL por um container de imagem personalizado
-//     const imageInputContainer = document.querySelector('div.relative:has(input[name="url_imagem_perfil"])');
-//     const imageInput = document.querySelector('input[name="url_imagem_perfil"]');
-
-//     // Configurar o preview da imagem
-//     const previewImage = document.getElementById('preview-image');
-//     const defaultImage = document.getElementById('default-image');
-//     const fileInput = document.getElementById('profile-image-input');
-//     const imageContainer = document.querySelector('.group');
-
-//     imageContainer.addEventListener('click', () => fileInput.click());
-
-//     fileInput.addEventListener('change', function(e) {
-//         const file = e.target.files[0];
-//         if (file) {
-//             const reader = new FileReader();
-//             reader.onload = function(e) {
-//                 previewImage.src = e.target.result;
-//                 previewImage.classList.remove('hidden');
-//                 defaultImage.classList.add('hidden');
-//             };
-//             reader.readAsDataURL(file);
-//         }
-//     });
-
-//     function showFeedback(message, isSuccess = true, duration = 5000) {
-//         if (feedbackTimeout) {
-//             clearTimeout(feedbackTimeout);
-//         }
-
-//         feedbackText.textContent = message;
-//         feedbackIcon.className = isSuccess
-//             ? 'fas fa-check-circle text-green-500 text-xl'
-//             : 'fas fa-exclamation-circle text-red-500 text-xl';
-//         feedbackElement.style.display = 'block';
-
-//         feedbackTimeout = setTimeout(() => {
-//             feedbackElement.style.display = 'none';
-//             if (isSuccess) {
-//                 window.location.href = '/auth/login';
-//             }
-//         }, duration);
-//     }
-
-//     // Modal de confirmação do voluntário
-//     const modalHTML = `
-//         <div id="volunteerModal" class="fixed inset-0 bg-base-600 bg-opacity-80 hidden flex items-center justify-center z-50">
-//             <div class="bg-base-100 p-6 rounded-lg shadow-xl max-w-md w-full">
-//                 <h3 class="text-lg font-bold mb-4">Termos do Voluntariado</h3>
-//                 <div class="mb-4 text-sm text-base-600">
-//                     <p>Ao se registrar como voluntário, você concorda em:</p>
-//                     <ul class="list-disc pl-5 mt-2">
-//                         <li>Dedicar tempo para ajudar outros membros da comunidade</li>
-//                         <li>Seguir nosso código de conduta</li>
-//                         <li>Participar de treinamentos quando necessário</li>
-//                         <li>Manter confidencialidade sobre informações sensíveis</li>
-//                     </ul>
-//                 </div>
-//                 <div class="flex justify-end space-x-3">
-//                     <button id="cancelVolunteer" class="px-4 py-2 text-base-600 hover:bg-base-100 rounded">
-//                         Cancelar
-//                     </button>
-//                     <button id="confirmVolunteer" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-//                         Aceito os Termos
-//                     </button>
-//                 </div>
-//             </div>
-//         </div>
-//     `;
-//     document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-//     const modal = document.getElementById('volunteerModal');
-//     const confirmBtn = document.getElementById('confirmVolunteer');
-//     const cancelBtn = document.getElementById('cancelVolunteer');
-
-//     voluntarioCheckbox.addEventListener('change', function(e) {
-//         if (this.checked) {
-//             modal.classList.remove('hidden');
-//         }
-//     });
-
-//     confirmBtn.addEventListener('click', function() {
-//         modal.classList.add('hidden');
-//         voluntarioCheckbox.checked = true;
-//     });
-
-//     cancelBtn.addEventListener('click', function() {
-//         modal.classList.add('hidden');
-//         voluntarioCheckbox.checked = false;
-//     });
-
-//     // Upload da imagem primeiro, então enviar o formulário
-//     async function uploadImage(file) {
-//         const imageFormData = new FormData();
-//         imageFormData.append('file', file);
-
-//         try {
-//             const response = await fetch('/api/v1/uploads/profile-image', {
-//                 method: 'POST',
-//                 body: imageFormData
-//             });
-
-//             if (!response.ok) {
-//                 throw new Error('Falha no upload da imagem');
-//             }
-
-//             const data = await response.json();
-//             return data.url;
-//         } catch (error) {
-//             console.error('Erro no upload da imagem:', error);
-//             throw error;
-//         }
-//     }
-
-//     form.addEventListener('submit', async function(e) {
-//         e.preventDefault();
-
-//         const formData = new FormData(form);
-
-//         try {
-//             // Upload da imagem se existir
-//             const imageFile = fileInput.files[0];
-//             if (imageFile) {
-//                 const imageUrl = await uploadImage(imageFile);
-//                 formData.set('url_imagem_perfil', imageUrl);
-//             }
-
-//             // Handle checkboxes
-//             const checkboxes = ['eh_voluntario', 'eh_gerente', 'deficiencia_auditiva',
-//                                'usa_cadeira_rodas', 'deficiencia_cognitiva', 'lgbtq'];
-
-//             checkboxes.forEach(checkbox => {
-//                 if (!formData.has(checkbox)) {
-//                     formData.set(checkbox, 'false');
-//                 } else {
-//                     formData.set(checkbox, 'true');
-//                 }
-//             });
-
-//             // Validate password
-//             const senha = formData.get('senha_hash');
-//             const confirmarSenha = formData.get('confirmar_senha');
-
-//             if (senha !== confirmarSenha) {
-//                 showFeedback('As senhas não coincidem!', false);
-//                 return;
-//             }
-
-//             // Remove confirmation password
-//             formData.delete('confirmar_senha');
-
-//             const response = await fetch('/api/v1/users/', {
-//                 method: 'POST',
-//                 body: formData
-//             });
-
-//             const data = await response.json();
-
-//             if (response.ok) {
-//                 showFeedback('Conta criada com sucesso! Redirecionando para o login...', true, 2000);
-//             } else {
-//                 let errorMessage = 'Erro ao criar conta. ';
-
-//                 if (response.status === 409) {
-//                     errorMessage += data.detail || 'Este usuário já existe.';
-//                 } else if (response.status === 422) {
-//                     errorMessage += 'Por favor, verifique os dados informados.';
-//                 } else {
-//                     errorMessage += data.detail || 'Tente novamente mais tarde.';
-//                 }
-
-//                 showFeedback(errorMessage, false, 5000);
-//             }
-//         } catch (error) {
-//             console.error('Erro:', error);
-//             showFeedback('Erro ao conectar com o servidor. Tente novamente.', false, 5000);
-//         }
-//     });
-
-//     document.querySelector('#mensagem-feedback button').addEventListener('click', () => {
-//         if (feedbackTimeout) {
-//             clearTimeout(feedbackTimeout);
-//         }
-//         feedbackElement.style.display = 'none';
-//     });
-// });
-
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -318,23 +109,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar o preview da imagem
     const previewImage = document.getElementById('preview-image');
     const defaultImage = document.getElementById('default-image');
-    const fileInput = document.getElementById('profile-image-input');
-    const imageContainer = document.querySelector('.group');
+   const imageContainer = document.querySelector('.group'); // Certifique-se que a classe é a mesma
+const fileInput = document.getElementById('fileInput'); // Certifique-se do ID
 
+if (imageContainer && fileInput) {
     imageContainer.addEventListener('click', () => fileInput.click());
 
-    fileInput.addEventListener('change', function(e) {
+    fileInput.addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                previewImage.classList.remove('hidden');
-                defaultImage.classList.add('hidden');
+            reader.onload = function (e) {
+                const previewImage = document.getElementById('preview-image');
+                const defaultImage = document.getElementById('default-image');
+
+                if (previewImage && defaultImage) {
+                    previewImage.src = e.target.result;
+                    previewImage.classList.remove('hidden');
+                    defaultImage.classList.add('hidden');
+                }
             };
             reader.readAsDataURL(file);
         }
     });
+}
 
     function showFeedback(message, isSuccess = true, duration = 5000) {
         if (feedbackTimeout) {
@@ -357,10 +155,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Modal de confirmação do voluntário
     const modalHTML = `
-        <div id="volunteerModal" class="fixed inset-0 bg-base-600 bg-opacity-80 hidden flex items-center justify-center z-50">
-            <div class="bg-base-100 p-6 rounded-lg shadow-xl max-w-md w-full">
+        <div id="volunteerModal" class="fixed inset-0 bg-neutral-600 bg-opacity-80 hidden flex items-center justify-center z-50">
+            <div class="bg-neutral-100 p-6 rounded-lg shadow-xl max-w-md w-full">
                 <h3 class="text-lg font-bold mb-4">Termos do Voluntariado</h3>
-                <div class="mb-4 text-sm text-base-600">
+                <div class="mb-4 text-sm text-neutral-600">
                     <p>Ao se registrar como voluntário, você concorda em:</p>
                     <ul class="list-disc pl-5 mt-2">
                         <li>Dedicar tempo para ajudar outros membros da comunidade</li>
@@ -370,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </ul>
                 </div>
                 <div class="flex justify-end space-x-3">
-                    <button id="cancelVolunteer" class="px-4 py-2 text-base-600 hover:bg-base-100 rounded">
+                    <button id="cancelVolunteer" class="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded">
                         Cancelar
                     </button>
                     <button id="confirmVolunteer" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
@@ -428,11 +226,19 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const formData = new FormData(form);
+         console.log('Formulário submetido');  // Log inicial
 
-        try {
-            // Upload da imagem se existir
-            const imageFile = fileInput.files[0];
+        const formData = new FormData(form);
+        const fileInputSubmit = document.getElementById('fileInput');
+
+        formData.set('eh_deletado', false);
+        formData.set('id_organizacao', parseInt(formData.get('id_organizacao'), 10));
+
+
+        console.log('Dados do formulário:', Object.fromEntries(formData));
+         try {
+            const imageFile = fileInputSubmit.files[0];
+
             if (imageFile) {
                 const imageUrl = await uploadImage(imageFile);
                 formData.set('url_imagem_perfil', imageUrl);
@@ -454,6 +260,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const senha = formData.get('senha_hash');
             const confirmarSenha = formData.get('confirmar_senha');
 
+            console.log('Dados do formulário2:', Object.fromEntries(formData));
+
             if (senha !== confirmarSenha) {
                 showFeedback('As senhas não coincidem!', false);
                 return;
@@ -461,10 +269,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Remove confirmation password
             formData.delete('confirmar_senha');
+            formData.delete('file');
+            if (fileInputSubmit) {
+                fileInputSubmit.remove();
+            }
+
+            // Converta o FormData em um objeto JavaScript
+            const userData = Object.fromEntries(formData);
+
+            // Log de todos os dados que serão enviados
+            console.log('Dados do usuário a serem enviados:', userData);
+
+            // Remove url_imagem_perfil se estiver vazio ou indefinido
+            if (!userData.url_imagem_perfil) {
+                delete userData.url_imagem_perfil;
+            }
+
+            // if (formData.get('url_imagem_perfil') === undefined || formData.get('url_imagem_perfil') === '') {
+            //     formData.delete('url_imagem_perfil');
+            // }
+
 
             const response = await fetch('/api/v1/users/', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
             });
 
             const data = await response.json();

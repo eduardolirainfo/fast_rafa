@@ -1,0 +1,89 @@
+{% if post %}
+<div class="card">
+  <div class="card-inner">
+    <div class="box">
+      <div class="imgBox">
+        {% if post.url_imagem_post %}
+        <img
+          src="{{ post.url_imagem_post }}"
+          alt="Post image"
+          class="object-cover rounded-lg cursor-pointer post-image w-full h-full transition-transform duration-300 ease-in-out transform hover:scale-110"
+          data-title="{{ post.titulo }}"
+          data-description="{{ post.descricao }}"
+          data-category="{{ post.categories.categoria }}"
+          data-likes="{{ post.likes_count }}"
+          data-comments="{{ post.comments_count }}"
+          data-username="@{{ post.uploader.username }}"
+          data-avatar="{{ post.uploader.url_imagem_perfil }}"
+          data-date="{{ post.criado_em }}"
+          data-categoryslug="{{ post.categories.slug }}"
+        />
+
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="content border-b border-base-200 my-4 dark:border-neutral-500">
+    <h3>{{ post.titulo }}</h3>
+    <p>{{ post.descricao }}</p>
+    <ul>
+      <li class="{{ post.categories.slug }}">
+        {{ post.categories.categoria }}
+      </li>
+    </ul>
+    <div class="flex items-end space-x-4 mt-4 my-4">
+      <button class="flex items-end space-x-1">
+        <i class="far fa-heart"></i>
+        <span>{{ post.likes_count }}</span>
+      </button>
+      <button class="flex items-end space-x-1">
+        <i class="far fa-comment"></i>
+        <span>{{ post.comments_count }}</span>
+      </button>
+      <div class="dropdown dropdown-right">
+        <button
+          tabindex="0"
+          role="button"
+          class="flex items-end space-x-1"
+          id="shareBtn"
+        >
+          <i class="far fa-share-square"></i>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+          >
+            <li>
+              <a
+                href="https://twitter.com/intent/tweet?url={{ post.url_imagem_post }}&text={{ post.titulo }}"
+                target="_blank"
+                class="block p-2 text-blue-500 hover:bg-gray-100"
+                >Twitter</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://www.facebook.com/sharer/sharer.php?u={{ post.url_imagem_post }}"
+                target="_blank"
+                class="block p-2 text-blue-700 hover:bg-gray-100"
+                >Facebook</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://api.whatsapp.com/send?text={{ post.url_imagem_post }}"
+                target="_blank"
+                class="block p-2 text-green-500 hover:bg-gray-100"
+                >WhatsApp</a
+              >
+            </li>
+          </ul>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="bg-base-100 rounded-lg shadow-sm p-4">
+  <h4 class="font-semibold text-center">Nenhuma postagem encontrada</h4>
+</div>
+{% endif %}

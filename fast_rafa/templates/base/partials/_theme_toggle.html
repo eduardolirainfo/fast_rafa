@@ -1,0 +1,884 @@
+<style>
+  button:hover .w-2:nth-child(1n) {
+    animation: pulse 1s ease infinite;
+  }
+
+  button:hover .w-2:nth-child(2n) {
+    animation: pulse 1s ease infinite 0.2s;
+  }
+
+  button:hover .w-2:nth-child(3n) {
+    animation: pulse 1s ease infinite 0.4s;
+  }
+
+  button:hover .w-2:nth-child(4n) {
+    animation: pulse 1s ease infinite 0.6s;
+  }
+
+  button.active {
+    border-radius: 0.375rem;
+    border: 2px solid #ff0000; /* Substitua pela cor desejada */
+    border-opacity: 0.7;
+    transition: all 150ms ease-in-out;
+  }
+
+  button:hover {
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adicionando sombra */
+    filter: brightness(1.25); /* Brilho aumentado */
+    transition: all 150ms ease-in-out;
+  }
+
+  button.active .w-2:nth-child(1n) {
+    animation: pulse 1s ease infinite;
+  }
+
+  button.active .w-2:nth-child(2n) {
+    animation: pulse 1s ease infinite 0.2s;
+  }
+
+  button.active .w-2:nth-child(3n) {
+    animation: pulse 1s ease infinite 0.4s;
+  }
+
+  button.active .w-2:nth-child(4n) {
+    animation: pulse 1s ease infinite 0.6s;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+</style>
+<div title="Alterar Tema" class="dropdown dropdown-end" id="theme-selector">
+  <div tabindex="0" role="button" class="btn btn-ghost">
+    <svg
+      width="20"
+      height="20"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      class="inline-block h-5 w-5 md:h-6 md:w-6"
+      stroke="currentColor"
+      data-astro-cid-lgn464si=""
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+        data-astro-cid-lgn464si=""
+      ></path>
+    </svg>
+    <svg
+      width="12px"
+      height="12px"
+      class="hidden h-2 w-2 fill-current opacity-60 sm:inline-block"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 2048 2048"
+    >
+      <path
+        d="M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z"
+      ></path>
+    </svg>
+  </div>
+  <div
+    tabindex="0"
+    class="dropdown-content bg-base-200 text-base-content rounded-box top-px h-[28.6rem] max-h-[calc(100vh-10rem)] w-56 overflow-y-auto border border-white/5 shadow-2xl outline outline-1 outline-black/5 mt-16"
+  >
+    <div class="grid grid-cols-1 gap-3 p-3">
+      <button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="light"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="light"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">light</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="dark"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="dark"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">dark</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="cupcake"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="cupcake"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">cupcake</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="bumblebee"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="bumblebee"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">bumblebee</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="emerald"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="emerald"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">emerald</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="corporate"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="corporate"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">corporate</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="synthwave"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="synthwave"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">synthwave</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="retro"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="retro"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">retro</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="cyberpunk"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="cyberpunk"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">cyberpunk</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="valentine"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="valentine"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">valentine</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="halloween"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="halloween"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">halloween</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="garden"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="garden"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">garden</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="forest"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="forest"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">forest</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="aqua"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="aqua"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">aqua</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="lofi"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="lofi"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">lofi</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="pastel"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="pastel"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">pastel</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="fantasy"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="fantasy"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">fantasy</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="wireframe"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="wireframe"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">wireframe</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="black"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="black"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">black</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="luxury"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="luxury"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">luxury</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="dracula"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="dracula"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">dracula</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="cmyk"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="cmyk"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">cmyk</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="autumn"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="autumn"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">autumn</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="business"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="business"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">business</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="acid"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="acid"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">acid</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="lemonade"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="lemonade"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">lemonade</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4 [&amp;_svg]:visible"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="night"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="night"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">night</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="coffee"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="coffee"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">coffee</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="winter"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="winter"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">winter</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="dim"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="dim"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">dim</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="nord"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="nord"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">nord</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span></button
+      ><button
+        class="outline-base-content text-start outline-offset-4"
+        data-act-class="[&amp;_svg]:visible"
+        data-set-theme="sunset"
+      >
+        <span
+          class="bg-base-100 rounded-btn text-base-content block w-full cursor-pointer font-sans"
+          data-theme="sunset"
+          ><span class="grid grid-cols-5 grid-rows-3"
+            ><span
+              class="col-span-5 row-span-3 row-start-1 flex items-center gap-2 px-4 py-3"
+            >
+              <span class="flex-grow text-sm">sunset</span>
+              <span class="flex h-full shrink-0 flex-wrap gap-1"
+                ><span class="bg-primary rounded-badge w-2"></span>
+                <span class="bg-secondary rounded-badge w-2"></span>
+                <span class="bg-accent rounded-badge w-2"></span>
+                <span
+                  class="bg-neutral rounded-badge w-2"
+                ></span></span></span></span
+        ></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  function toggleConteudo() {
+    let toggle = document.getElementById("theme-selector-button");
+    var conteudo = document.getElementById("conteudo");
+    if (toggle && conteudo) {
+      toggle.addEventListener("click", () => {
+        conteudo.classList.toggle("show");
+      });
+
+      // Adiciona um ouvinte de evento para fechar o dropdown quando clicar fora dele
+      document.addEventListener("click", (event) => {
+        if (
+          !conteudo.contains(event.target) &&
+          !toggle.contains(event.target)
+        ) {
+          conteudo.classList.remove("show");
+        }
+      });
+    }
+  }
+
+  toggleConteudo();
+  document.addEventListener("astro:after-swap", toggleConteudo);
+
+  function ThemeSelector() {
+    const themeSelectors = document.querySelectorAll(
+      "#theme-selector button span[data-theme]"
+    );
+
+    if (!themeSelectors) return;
+
+    themeSelectors.forEach((selector) => {
+      selector.addEventListener("click", async () => {
+        await selectTheme(selector);
+      });
+    });
+
+    const storedTheme = window.localStorage.getItem("data-theme");
+    const initialTheme = storedTheme ? storedTheme : "aqua";
+
+    const spanThemeSelector = document.querySelector(
+      `#theme-selector button span[data-theme="${initialTheme}"]`
+    );
+
+    const buttonThemeSelector = document.querySelector(
+      `#theme-selector button[data-set-theme="${initialTheme}"]`
+    );
+
+    const spanSelector = spanThemeSelector.getAttribute("data-theme");
+    const buttonSelector = buttonThemeSelector.getAttribute("data-set-theme");
+
+    if (spanSelector === buttonSelector && spanSelector === initialTheme) {
+      if (!buttonThemeSelector.classList.contains("active")) {
+        buttonThemeSelector.classList.add("theme-icon", "active");
+        updateTheme(initialTheme);
+      }
+    }
+  }
+
+  function mudarTema(selector) {
+    const newTheme = selector.getAttribute("data-theme");
+
+    const allThemeSelectors = document.querySelectorAll(
+      "#theme-selector button[data-set-theme]"
+    );
+
+    if (newTheme === window.localStorage.getItem("data-theme")) return;
+
+    allThemeSelectors.forEach((themeSelector) => {
+      if (
+        !themeSelector.classList.contains("[&_svg]:visible") &&
+        newTheme === window.localStorage.getItem("data-theme")
+      ) {
+        themeSelector.classList.add("theme-icon", "active");
+      }
+    });
+
+    if (newTheme !== window.localStorage.getItem("data-theme")) {
+      allThemeSelectors.forEach((themeSelector) => {
+        themeSelector.classList.remove("theme-icon");
+        themeSelector.classList.remove("active");
+      });
+
+      updateTheme(newTheme);
+      allThemeSelectors.forEach((themeSelector) => {
+        if (themeSelector.getAttribute("data-set-theme") === newTheme) {
+          themeSelector.classList.add("theme-icon", "active");
+        }
+      });
+    }
+  }
+
+  function updateTheme(newTheme) {
+    const htmlElement = document.querySelector("html");
+    if (htmlElement) {
+      htmlElement.setAttribute("data-theme", newTheme);
+    }
+    window.localStorage.setItem("data-theme", newTheme);
+  }
+
+  async function selectTheme(selector) {
+    mudarTema(selector);
+  }
+  //document load
+  document.addEventListener("DOMContentLoaded", ThemeSelector);
+</script>
+{% endblock %}

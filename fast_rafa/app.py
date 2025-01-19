@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from fast_rafa.modules.auth.routes import router as token_router
@@ -20,11 +21,21 @@ from fast_rafa.modules.seeds.routes import router as seed_router
 from fast_rafa.modules.uploads.routes import router as upload_router
 from fast_rafa.modules.users.routes import router as user_router
 from fast_rafa.modules.watchlists.routes import router as watchlist_router
+ 
 
 app = FastAPI(
     title='fast_rafa',
     version='0.1.0',
     description='API para o projeto fast_rafa',
+)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],  # Ou seu domínio específico
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
 )
 
 

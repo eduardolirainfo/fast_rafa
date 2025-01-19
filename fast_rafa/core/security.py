@@ -26,7 +26,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):
     async def __call__(self, request: Request) -> Optional[str]:
         try:
-            return await super().__call__(request)
+            token = await super().__call__(request)
+            print(f'Token recebido: {token}')  # Adicione este log
+            return token
         except HTTPException as e:
             if e.status_code == status.HTTP_401_UNAUTHORIZED:
                 raise HTTPException(
@@ -75,6 +77,7 @@ async def get_current_user(
 
     try:
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f'Payload do Token: {payload}')
         username: str = payload.get('sub')
         if username is None:
             raise credentials_exception
@@ -125,3 +128,35 @@ async def get_user_from_cookie(
         return None, 'Token inválido'
     except Exception as e:
         return None, f'Erro ao processar token: {str(e)}'
+
+
+async def get_user_and_access_token_from_cookie(
+    request: Request, db: Session
+) -> Tuple[Optional[User], Optional[str], Optional[str]]:
+    """
+    Tenta obter o usuário atual e o access_token a partir do token no cookie.
+    Retorna uma tupla com (usuário, access_token, mensagem_erro).
+    Se não encontrar usuário ou access_token,
+    retorna (None, None, mensagem_erro).
+    """
+    try:
+        token = request.cookies.get('access_token')
+        if not token:
+            return None, None, 'Token não encontrado no cookie'
+
+        payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
+
+        if not username:
+            return None, None, 'Username não encontrado no token'
+
+        user = db.scalar(select(User).where(User.username == username))
+        if not user:
+            return None, None, 'Usuário não encontrado'
+
+        return user, token, None
+
+    except PyJWTError:
+        return None, None, 'Token inválido'
+    except Exception as e:
+        return None, None, f'Erro ao processar token: {str(e)}'

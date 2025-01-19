@@ -1,0 +1,57 @@
+<div class="bg-base-100 rounded-lg">
+  <div class="flex items-center justify-between mb-6">
+    <h4 class="text-xl font-bold text-primary">Campanhas em Destaque</h4>
+    <a href="/events" class="text-sm text-secondary hover:underline"
+      >Ver todas</a
+    >
+  </div>
+
+  <div class="space-y-4">
+    {% for event, user_count in suggested_events %}
+    <div class="group">
+      <a
+        href="/events/{{ event.slug }}"
+        class="flex items-center justify-between p-4 bg-base-200 rounded-lg transition-all duration-300 hover:bg-base-300 hover:shadow-md"
+      >
+        <!-- Container para a imagem, separado da área de texto -->
+        <div class="flex-shrink-0">
+          {% if event.url_imagem %}
+          <img
+            src="{{ event.url_imagem }}"
+            alt="Imagem do evento {{ event.titulo }}"
+            class="w-16 h-16 object-cover rounded-lg"
+          />
+          {% endif %}
+        </div>
+
+        <div class="flex-grow pr-4">
+          <h5
+            class="font-semibold text-base-content group-hover:text-primary transition-colors ml-4"
+            title="{{ event.titulo }}"
+            style="max-height: 3rem; overflow: hidden"
+          >
+            {{ event.titulo|truncate(70, True, '...') }}
+          </h5>
+          <div class="flex items-center space-x-2 mt-1 ml-4">
+            <span class="badge badge-accent badge-xs">Beneficente</span>
+          </div>
+        </div>
+
+        <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+          <i class="fas fa-chevron-right text-secondary"></i>
+        </div>
+      </a>
+    </div>
+    {% else %}
+    <div class="alert alert-ghost text-center">
+      <span>Nenhuma campanha em destaque no momento</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if suggested_events|length > 5 %}
+  <div class="text-center mt-6">
+    <button class="btn btn-ghost btn-sm">Carregar mais campanhas</button>
+  </div>
+  {% endif %}
+</div>

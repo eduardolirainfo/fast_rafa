@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from fast_rafa.modules.categories.models import Category
 from fast_rafa.modules.organizations.models import Organization
 from fast_rafa.modules.posts.models import Post
 from fast_rafa.modules.posts.schemas import CreatePost
@@ -22,11 +23,20 @@ async def seed_posts(session: Session):
     # Obter IDs de categorias, organizações e usuários
     logger.info('Iniciando a geração de posts...')
 
+    categorias = session.query(Category).all()
+    categoria_ids = [categoria.id for categoria in categorias]
+
     organizacoes = session.query(Organization).all()
     organizacao_ids = [org.id for org in organizacoes]
 
     usuarios = session.query(User).all()
     usuario_ids = [user.id for user in usuarios]
+
+    if not categoria_ids or not organizacao_ids or not usuario_ids:
+        logger.error(
+            'Não há categorias, organizações ou usuários cadastrados!'
+        )
+        return 'Não há categorias, organizações ou usuários cadastrados!'
 
     if not organizacao_ids or not usuario_ids:
         logger.error('Não há organizações ou usuários cadastrados!')
@@ -45,8 +55,7 @@ async def seed_posts(session: Session):
             'titulo': fake.sentence(nb_words=5),
             'descricao': fake.paragraph(nb_sentences=3),
             'quantidade': f'{fake.random_int(min=1, max=100)} unidades',
-            'id_categoria': choice(range(1, 4)),
-            # Alterando para URL fixa com ID único
+            'id_categoria': choice(categoria_ids),
             'url_imagem_post': 'https://picsum.photos/id/'
             f'{fake.random_int(min=1, max=1000)}/237/800.jpg',
             'data_validade': fake.date_between(

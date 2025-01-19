@@ -1,0 +1,156 @@
+{% if organizations %} {% if organizations is iterable and organizations is not
+string and organizations|length > 1 %}
+<div class="grid">
+  {% for organization in organizations %}
+  <div
+    class="card card-bordered bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300"
+  >
+    <figure class="relative overflow-hidden">
+      {% if organization.url_imagem %}
+      <img
+        src="{{ organization.url_imagem }}"
+        alt="Organization image"
+        class="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
+      />
+      {% if organization.url_logo %}
+      <div
+        class="absolute bottom-4 left-4 bg-white/80 rounded-full p-2 shadow-md"
+      >
+        <img
+          src="{{ organization.url_logo }}"
+          alt="Organization logo"
+          class="w-16 h-16 object-cover rounded-full"
+        />
+      </div>
+      {% endif %} {% endif %}
+    </figure>
+
+    <div class="card-body">
+      <h2 class="card-title text-xl font-bold text-primary">
+        {{ organization.nome }}
+      </h2>
+      <p class="text-base-600 line-clamp-2">{{ organization.descricao }}</p>
+
+      <div class="space-y-2 mt-4">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-map-marker-alt text-secondary"></i>
+          <span class="text-sm"
+            >{{ organization.cidade }}, {{ organization.estado }}</span
+          >
+        </div>
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-building text-secondary"></i>
+          <span class="text-sm">
+            {% if organization.nao_governamental %}ONG{% else %}Empresa{% endif
+            %}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-actions justify-between items-center mt-4">
+        <span class="text-sm text-base-500"> </span>
+        <a
+          href="/organizations/{{ organization.id }}"
+          class="btn btn-primary btn-sm"
+        >
+          Ver Detalhes
+          <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %} {% with organization=organizations if organizations is not iterable
+else organizations[0] %}
+<div class="grid">
+  <div
+    class="card card-bordered bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300"
+  >
+    <figure class="relative overflow-hidden">
+      {% if organization.url_imagem %}
+      <img
+        src="{{ organization.url_imagem }}"
+        alt="Organization image"
+        class="w-full h-56 object-cover transition-transform duration-500 hover:scale-105"
+      />
+      {% if organization.url_logo %}
+      <div
+        class="absolute bottom-4 left-4 bg-white/80 rounded-full p-2 shadow-md"
+      >
+        <img
+          src="{{ organization.url_logo }}"
+          alt="Organization logo"
+          class="w-16 h-16 object-cover rounded-full"
+        />
+      </div>
+      {% endif %} {% endif %}
+    </figure>
+
+    <div class="card-body">
+      <h2 class="card-title text-xl font-bold text-primary">
+        {{ organization.nome }}
+      </h2>
+      <p class="line-clamp-3">{{ organization.descricao }}</p>
+
+      <div class="space-y-2 mt-4">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-map-marker-alt text-secondary"></i>
+          <span
+            >{{ organization.rua }}, {{ organization.cidade }}, {{
+            organization.estado }}, {{ organization.cep }}</span
+          >
+        </div>
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-phone text-secondary"></i>
+          <span>{{ organization.telefone }}</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-envelope text-secondary"></i>
+          <span>{{ organization.email }}</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-clock text-secondary"></i>
+          <span
+            >{{ organization.abertura }} - {{ organization.fechamento }}
+            (Intervalo: {{ organization.intervalo }})</span
+          >
+        </div>
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-building text-secondary"></i>
+          <span>
+            {% if organization.nao_governamental %}ONG{% else %}Empresa{% endif
+            %}
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <iframe
+          src="https://www.google.com/maps?q={{ organization.rua | urlencode }},{{ organization.cidade | urlencode }},{{ organization.estado | urlencode }},{{ organization.cep | urlencode }}&output=embed"
+          class="w-full h-64 rounded-lg border-2 border-base-200"
+          allowfullscreen=""
+          loading="lazy"
+        ></iframe>
+      </div>
+      {% if organization.pode_editar %}
+      <div class="card-actions justify-end mt-4">
+        <button class="btn btn-primary btn-sm">
+          <i class="fas fa-edit mr-2"></i>Editar
+        </button>
+        <button class="btn btn-error btn-sm">
+          <i class="fas fa-trash mr-2"></i>Excluir
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endwith %} {% endif %} {% else %}
+<div class="alert alert-info shadow-lg max-w-md mx-auto">
+  <div>
+    <i class="fas fa-info-circle"></i>
+    <span>Nenhuma organização encontrada</span>
+  </div>
+</div>
+{% endif %}

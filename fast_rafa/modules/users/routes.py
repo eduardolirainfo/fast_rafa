@@ -24,6 +24,7 @@ from fast_rafa.modules.favorites.models import Favorite
 from fast_rafa.modules.messages.models import Message
 from fast_rafa.modules.organizations.models import Organization
 from fast_rafa.modules.posts.models import Post
+from fast_rafa.modules.posts.schemas import PostResponse
 from fast_rafa.modules.users.models import User
 from fast_rafa.modules.users.schemas import (
     CreateUser,
@@ -67,56 +68,27 @@ logger = setup_logger()
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserResponse)
 async def create_user(
     request: Request,
+    user_data: CreateUser,
     db: Session = Depends(get_session),
 ):
     logger.info('Iniciando criação de usuário...')
 
-    form_data = await request.form()
-    usuario_data = dict(form_data)
+    # Garantir que URL da imagem seja priorizada do payload
+    imagem_perfil: UploadFile = None
+    if 'multipart/form-data' in request.headers.get('Content-Type', ''):
+        form_data = await request.form()
+        imagem_perfil = form_data.get('imagem_perfil')
 
-    telefone = usuario_data.get('telefone', '')
-    telefone = re.sub(r'\D', '', telefone)
-    padrao_telefone = r'^\+?(\d{1,2})?(\d{2,3})?[\d]{4,5}[\d]{4}$'
-
-    if not re.match(padrao_telefone, telefone):
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail='Telefone inválido',
+    # Priorizar o caminho enviado no payload JSON
+    if user_data.url_imagem_perfil:
+        logger.info(
+            f'URL da imagem perfil fornecida: {user_data.url_imagem_perfil}'
         )
-
-    # Converter campos booleanos
-    for field in ['eh_deletado', 'eh_voluntario', 'eh_gerente']:
-        usuario_data[field] = form_data.get(field, 'off') == 'on'
-
-    # Converter id_organizacao para int
-    usuario_data['id_organizacao'] = int(usuario_data['id_organizacao'])
-
-    # Resto do seu código permanece igual
-    organizacao = get_by_sel(
-        db,
-        Organization,
-        filters={'filter_plus': {'id': usuario_data['id_organizacao']}},
-    ).first()
-
-    if not organizacao:
-        logger.error(
-            f'Organização com ID {usuario_data["id_organizacao"]} não encontrada.'
+    elif imagem_perfil and imagem_perfil.filename:
+        # Processo de upload para salvar imagem no servidor
+        logger.info(
+            f'Processando upload da imagem de perfil: {imagem_perfil.filename}'
         )
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=get_not_found_message('Organização'),
-        )
-
-    senha_hash = get_password_hash(usuario_data['senha_hash'])
-    usuario_data['senha_hash'] = senha_hash
-
-    url_imagem_perfil = form_data.get('url_imagem_perfil')
-    imagem_perfil: UploadFile = form_data.get('imagem_perfil')
-
-    print(' - url_imagem_perfil:', url_imagem_perfil)
-    print(' - imagem_perfil:', imagem_perfil)
-
-    if imagem_perfil and imagem_perfil.filename and not url_imagem_perfil:
         if not allowed_file(imagem_perfil.filename):
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
@@ -129,24 +101,40 @@ async def create_user(
         if not os.path.exists(UPLOAD_FOLDER):
             os.makedirs(UPLOAD_FOLDER)
 
-        # se imagem não existir, salvar
-        if not os.path.exists(filepath):
-            with open(filepath, 'wb') as f:
-                f.write(imagem_perfil.file.read())
+        # Salvar imagem no diretório especificado
+        with open(filepath, 'wb') as f:
+            f.write(imagem_perfil.file.read())
 
-        usuario_data['url_imagem_perfil'] = filepath
-    elif url_imagem_perfil:
-        usuario_data['url_imagem_perfil'] = url_imagem_perfil
+        user_data.url_imagem_perfil = filepath
     else:
-        usuario_data['url_imagem_perfil'] = None
+        user_data.url_imagem_perfil = None
 
+    # Verificar se organização existe
+    organizacao = get_by_sel(
+        db,
+        Organization,
+        filters={'filter_plus': {'id': user_data.id_organizacao}},
+    ).first()
+
+    if not organizacao:
+        logger.error(
+            f'Organização com ID {user_data.id_organizacao} não encontrada.'
+        )
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=get_not_found_message('Organização'),
+        )
+
+    # Hash da senha
+    senha_hash = get_password_hash(user_data.senha_hash)
+    user_data.senha_hash = senha_hash
+
+    # Criar novo usuário
     logger.info('Criando objeto do novo usuário...')
-    novo_usuario = User.create(CreateUser(**usuario_data))
+    novo_usuario = User.create(CreateUser(**user_data.dict()))
 
     try:
-        logger.info(
-            f'Adicionando novo usuário ao banco de dados: {usuario_data}'
-        )
+        logger.info(f'Adicionando novo usuário ao banco de dados: {user_data}')
         db.add(novo_usuario)
         db.commit()
         db.refresh(novo_usuario)
@@ -311,7 +299,7 @@ def read_user_by_email(
 
 
 @router.get(
-    '/organization/{id_organizacao}',
+    '/organizations/{id_organizacao}',
     status_code=HTTPStatus.OK,
     response_model=dict,
 )
@@ -347,6 +335,44 @@ def read_user_by_id_organization(
     ]
 
     return {'users': user_by_id_organization}
+
+
+@router.get(
+    '/user/{user_id}/posts',
+    status_code=HTTPStatus.OK,
+    response_model=list[PostResponse],
+)
+def read_posts_by_user(
+    user_id: int,
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_session),
+):
+    usuario = get_by_sel(
+        db,
+        User,
+        filters={'filter_plus': {'id': user_id}},
+    ).first()
+
+    if not usuario:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Usuário não encontrado.',
+        )
+    # Filtra os posts pelo ID do usuário
+
+    posts = (
+        get_by_sel(db, Post, filters={'filter_plus': {'id_usuario': user_id}})
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+    if not posts:
+        posts = []
+
+    postagens_resposta = [PostResponse.from_home(post) for post in posts]
+    return postagens_resposta
 
 
 @router.patch('/{user_id}/status', status_code=HTTPStatus.OK)
@@ -402,22 +428,25 @@ def update_status(
 @router.put(
     '/{user_id}',
     status_code=HTTPStatus.OK,
-    response_model=UpdateUserResponse,
+    response_model=UserResponse,
 )
-def update_user(
+async def update_user(
     user_id: int,
+    request: Request,
     user_data: UpdateUserRequest,
     db: Session = Depends(get_session),
     current_user=Depends(get_current_user),
 ):
-    organization = get_by_sel(
+    update_data = user_data.dict(exclude_unset=True)
+
+    # Resto do seu código permanece igual
+    organizacao = get_by_sel(
         db,
         Organization,
-        current_user.id,
         filters={'filter_plus': {'id': user_data.id_organizacao}},
     ).first()
 
-    if not organization:
+    if not organizacao:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail=get_not_found_message('Organização'),
@@ -429,16 +458,26 @@ def update_user(
             detail='Você não tem permissão para atualizar este usuário',
         )
 
-    update_data = user_data.dict()
-
-    if 'senha_hash' in update_data and update_data['senha_hash']:
-        update_data['senha_hash'] = get_password_hash(
+    if 'senha_hash' in update_data:
+        senha = update_data['senha_hash']
+        if senha:
+            update_data['senha_hash'] = get_password_hash(senha)
+        else:
             update_data.pop('senha_hash')
-        )
 
     usuario = User.update(current_user, update_data)
 
+    print('Updated user:', usuario)
     try:
+        usuario = db.get(User, user_id)
+        if not usuario:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=get_not_found_message('Usuário'),
+            )
+
+        for key, value in update_data.items():
+            setattr(usuario, key, value)
         db.commit()
         db.refresh(usuario)
     except IntegrityError as e:

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,18 +25,14 @@
     'base/partials/_search_bar_desktop.html' %} {% include
     'base/partials/_search_bar_mobile.html' %}
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 mt-20 md:mt-16 mb-16">
       <div class="md:grid md:grid-cols-12 gap-6 md:mx-4 py-8">
         {% include 'base/partials/_sidebar_left.html' %}
-        <div class="md:col-span-6 space-y-4">
-          {% block content %}{% endblock %}
-        </div>
+        <div class="md:col-span-6">{% block content %}{% endblock %}</div>
         {% include 'base/partials/_sidebar_right.html' %}
       </div>
     </main>
 
-    <!-- Mobile Navigation Bar -->
     <nav class="md:hidden fixed bottom-0 w-full bg-white border-t z-50">
       <div class="grid grid-cols-5 gap-1">
         <a

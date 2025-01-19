@@ -8,8 +8,8 @@ class CreateCategoryMain(BaseModel):
 
 
 class CreateCategory(BaseModel):
+    id: int
     categoria: str
-    id_categoria_principal: int
     slug: str
     icon: str | None = None  # Icon é opcional
 
@@ -19,8 +19,8 @@ class CategoryCreateResponse(BaseModel):
 
 
 class CategoryUpdateRequest(BaseModel):
+    id: int
     categoria: str
-    id_categoria_principal: int
     slug: str
     icon: str | None = None  # Icon é opcional
 

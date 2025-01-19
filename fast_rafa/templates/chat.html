@@ -1,7 +1,6 @@
 {% extends "base/layout.html" %} {% block title %}Mensagens{% endblock %} {%
 block content %}
 <div class="flex h-[calc(100vh-4rem)] bg-base">
-  <!-- Conversas Recentes (Sidebar) -->
   <div class="w-80 border-r bg-base-50 hidden md:block">
     <div class="p-4 border-b">
       <h2 class="text-xl font-bold text-base-800">Conversas</h2>
@@ -14,7 +13,7 @@ block content %}
       >
         <img
           src="{{ url_for('static', path=conversa.outro_usuario.url_imagem_perfil) or url_for('static', path='img/default-avatar.png') }}
-          
+
           "
           alt="Foto de Perfil"
           class="w-12 h-12 rounded-full mr-4"
@@ -41,9 +40,7 @@ block content %}
     </div>
   </div>
 
-  <!-- Área de Mensagens -->
   <div class="flex-1 flex flex-col">
-    <!-- Cabeçalho da Conversa -->
     <div class="bg-base-100 border-b p-4 flex items-center">
       <img
         src="{{ url_for('static', path=conversa_atual.outro_usuario.url_imagem_perfil) or url_for('static', path='img/default-avatar.png') }}"
@@ -61,7 +58,6 @@ block content %}
       </div>
     </div>
 
-    <!-- Área de Mensagens -->
     <div class="flex-1 overflow-y-auto p-4 space-y-4" id="messages-container">
       {% for mensagem in conversa_atual.mensagens %}
       <div
@@ -89,7 +85,6 @@ block content %}
       {% endfor %}
     </div>
 
-    <!-- Área de Envio de Mensagem -->
     <div class="border-t p-4">
       <form id="message-form" class="flex space-x-2">
         <div class="flex-1 relative">

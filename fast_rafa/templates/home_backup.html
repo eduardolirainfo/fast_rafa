@@ -1,6 +1,5 @@
 {% extends "base/layout.html" %} {% block title %} Rede de Doações {% endblock
 %} {% block content %}
-<!-- New Post Card -->
 {% if current_user is not none %}
 <div class="bg-base-100 rounded-lg shadow-sm p-4">
   <div class="flex space-x-4">
@@ -39,10 +38,8 @@
 </div>
 {% endif %}
 
-<!-- Posts Feed -->
 {% if posts %} {% for post in posts %}
 <div class="bg-base-100 rounded-lg shadow-sm">
-  <!-- Post Header -->
   <div class="p-4 flex items-center justify-between">
     <div class="flex items-center space-x-3">
       <img
@@ -65,7 +62,6 @@
     </button>
   </div>
 
-  <!-- Post Content -->
   <div class="px-4 pb-2">
     <p class="mb-2">{{ post.descricao }}</p>
     {% if post.categories %}
@@ -77,7 +73,6 @@
     {% endif %}
   </div>
 
-  <!-- Post Image -->
   {% if post.url_imagem_post %}
   <img
     src="{{ post.url_imagem_post }}"
@@ -86,7 +81,6 @@
   />
   {% endif %}
 
-  <!-- Post Actions -->
   <div class="px-4 py-2 flex items-center justify-between border-t">
     <div class="flex items-center space-x-4">
       <button

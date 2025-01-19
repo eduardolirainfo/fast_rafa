@@ -1,0 +1,11 @@
+{% extends "base/layout.html" %}
+{% block title %}
+Rede de Doações
+{% endblock %}
+{% block content %}
+{% include "base/partials/_post_list.html" %}
+{% include "base/partials/_post_preview.html" %}
+{% block scripts %}
+<script src="{{ url_for('static', path='js/img_post_preview.js') }}" defer></script>
+{% endblock %}
+{% endblock %}

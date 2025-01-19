@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Rede de Doações{% endblock %}</title>
+
+    <style type="text/css">
+      .category-icon {
+        width: 50px;
+        height: 50px;
+        transition: transform 0.3s ease;
+      }
+      .category-icon:hover {
+        transform: scale(1.1);
+      }
+
+      .chart-container {
+        width: 100%;
+        height: 300px;
+        margin-bottom: 20px;
+      }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/output.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+
+  <body>
+    {% include 'base/partials/_navbar.html' %}
+
+    <main class="container mx-auto px-4 mt-20 md:mt-16 mb-16 flex justify-center items-center">
+      <div class="grid grid-cols-1 md:grid-cols-12 w-full max-w-5xl gap-6 py-8 md:py-0">
+        {% if current_user %}
+          {% include 'base/partials/_sidebar_left.html' %}
+          <div class="md:col-span-6 px-6 pt-10">
+        {% else %}
+          <div class="md:col-span-12 space-y-4">
+        {% endif %}
+
+        <div class="chart-container">
+          <canvas id="myChart1"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="myChart2"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="myChart3"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="myChart4"></canvas>
+        </div>
+
+        {% block content %}{% endblock %}
+
+        </div>
+
+        {% if current_user %}
+          {% include 'base/partials/_sidebar_right.html' %}
+        {% endif %}
+      </div>
+    </main>
+
+    <nav class="md:hidden fixed bottom-0 w-full bg-base-100 border-t z-50">
+      <div class="grid grid-cols-5 gap-1">
+        <a href="/" class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600">
+          <i class="fas fa-home text-xl"></i>
+          <span class="text-xs mt-1">Home</span>
+        </a>
+        <a href="/explore" class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600">
+          <i class="fas fa-compass text-xl"></i>
+          <span class="text-xs mt-1">Explorar</span>
+        </a>
+        <a href="/new-post" class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600">
+          <i class="fas fa-plus-circle text-xl"></i>
+          <span class="text-xs mt-1">Doar</span>
+        </a>
+        <a href="/notifications" class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600">
+          <i class="fas fa-bell text-xl"></i>
+          <span class="text-xs mt-1">Notificações</span>
+        </a>
+        <a href="/profile" class="flex flex-col items-center py-2 text-base-600 hover:text-blue-600">
+          <i class="fas fa-user text-xl"></i>
+          <span class="text-xs mt-1">Perfil</span>
+        </a>
+      </div>
+    </nav>
+
+    <script>
+      var ctx1 = document.getElementById('myChart1').getContext('2d');
+      var myChart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],  // Meses do ano
+          datasets: [{
+            label: 'Quantidade de Doações por Mês',
+            data: {{ doacoes_por_mes|tojson }},  // Usando os dados de doações por mês
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(54, 162, 235, 1)',
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+     var ctx2 = document.getElementById('myChart2').getContext('2d');
+     var myChart2 = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: {{ categories_list|tojson }},
+          datasets: [{
+            label: 'Quantidade de Doações por Categoria',
+            data: {{ doacoes_por_categoria|tojson }},
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      var ctx3 = document.getElementById('myChart3').getContext('2d');
+      var myChart3 = new Chart(ctx3, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          datasets: [{
+            label: 'Doações ao Longo do Tempo',
+            data: {{ doacoes_ao_longo_do_tempo|tojson }},
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            fill: true
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      var ctx4 = document.getElementById('myChart4').getContext('2d');
+      var myChart4 = new Chart(ctx4, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          datasets: [{
+            label: 'Comida Não Desperdiçada ao Longo do Tempo',
+            data: {{ comida_nao_desperdicada|tojson }},
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+            fill: true
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

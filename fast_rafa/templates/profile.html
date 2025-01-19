@@ -1,9 +1,6 @@
 {% extends "base/layout.html" %} {% block title %}Perfil de {{
 current_user.primeiro_nome }} {{ current_user.sobrenome }}{% endblock %} {%
-block content %}
-
-<!-- Profile Header -->
-{% if current_user.sexo == 'F' and not current_user.lgbtq %}
+block content %} {% if current_user.sexo == 'F' and not current_user.lgbtq %}
 <div class="bg-gradient-to-r from-blue-500 to-purple-600 py-12 relative h-32">
   {% elif current_user.sexo == 'M' and not current_user.lgbtq %}
   <div class="bg-gradient-to-r from-green-500 to-blue-600 py-12 relative h-32">
@@ -34,7 +31,6 @@ block content %}
         </div>
       </div>
 
-      <!-- User Details -->
       <div class="pt-20 text-center">
         <h1 class="text-2xl font-bold text-base-800">
           {{ current_user.primeiro_nome }} {{ current_user.sobrenome }}
@@ -44,44 +40,43 @@ block content %}
         <div class="mt-4 flex justify-center space-x-2">
           {% if current_user.eh_voluntario %}
           <span
-            class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center"
+            class="bg-green-100 text-green-800 text-xs px-2 py-1 badge flex items-center"
           >
             <i class="fas fa-hands-helping mr-1"></i> Voluntário
           </span>
           {% endif %} {% if current_user.eh_gerente %}
           <span
-            class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center"
+            class="bg-blue-100 text-blue-800 text-xs px-2 py-1 badge flex items-center"
           >
             <i class="fas fa-user-tie mr-1"></i> Gerente
           </span>
           {% endif %} {% if current_user.deficiencia_auditiva %}
           <span
-            class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center"
+            class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 badge flex items-center"
           >
             <i class="fas fa-deaf mr-1"></i> Deficiência Auditiva
           </span>
           {% endif %} {% if current_user.usa_cadeira_rodas %}
           <span
-            class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full flex items-center"
+            class="bg-purple-100 text-purple-800 text-xs px-2 py-1 badge flex items-center"
           >
             <i class="fas fa-wheelchair mr-1"></i> Usa Cadeira de Rodas
           </span>
           {% endif %} {% if current_user.deficiencia_cognitiva %}
           <span
-            class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full flex items-center"
+            class="bg-red-100 text-red-800 text-xs px-2 py-1 badge flex items-center"
           >
             <i class="fas fa-brain mr-1"></i> Deficiência Cognitiva
           </span>
           {% endif %} {% if current_user.lgbtq %}
           <span
-            class="bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded-full flex items-center"
+            class="bg-pink-100 text-pink-800 text-xs px-2 py-1 badge flex items-center"
           >
             <i class="fas fa-rainbow mr-1"></i> LGBTQIAPN+
           </span>
           {% endif %}
         </div>
       </div>
-      <!-- Profile Stats -->
       <div class="mt-6 grid grid-cols-3 gap-4 border-t py-4">
         <div class="text-center">
           <span class="block text-xl font-bold text-blue-600">
@@ -103,7 +98,6 @@ block content %}
         </div>
       </div>
 
-      <!-- Contact and Organization Info -->
       <div class="p-4 bg-base-50">
         <div class="grid md:grid-cols-2 gap-4">
           <div>
@@ -125,7 +119,6 @@ block content %}
         </div>
       </div>
 
-      <!-- Profile Actions -->
       <div class="p-4 bg-base-100 border-t">
         <div class="flex space-x-4 justify-center">
           <a

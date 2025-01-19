@@ -1,122 +1,99 @@
-<nav
-  class="fixed z-20 w-full backdrop-blur-md fixed w-full top-0 z-50 shadow-sm"
->
-  <div class="container mx-auto px-4">
-    <div class="flex justify-between items-center h-16">
-      <!-- Logo -->
-      <div class="flex items-center">
-        <a href="/" class="flex items-center space-x-2">
-          <img
-            src="{{ url_for('static', path='img/rafa-logo.svg') }}"
-            alt="Logo"
-            class="h-10 w-10"
-          />
-          <span class="text-xl font-bold text-blue-600">Rafa</span>
-        </a>
-      </div>
+<nav class="fixed z-20 w-full backdrop-blur-md top-0 z-50 shadow-sm">
+  <div class="grid grid-cols-12 max-w-5xl mx-auto px-4 h-16 items-center">
+    <div class="col-span-3 flex items-center">
+      <a href="/" class="flex items-center space-x-2">
+        <img
+          src="{{ url_for('static', path='img/rafa-logo.svg') }}"
+          alt="Logo"
+          class="h-10 w-10"
+        />
+        <span class="text-xl font-bold text-blue-600">Rafa</span>
+      </a>
+    </div>
 
-      {% include 'base/partials/_search_bar_desktop.html' %} {% include
-      'base/partials/_search_bar_mobile.html' %}
+    <div class="col-span-6 hidden md:flex justify-center">
+      {% include 'base/partials/_search_bar_desktop.html' %}
+    </div>
 
-      <!-- Navigation Icons -->
-      <div class="flex items-center space-x-4">
-        <a href="/messages" class="text-base-600 hover:text-blue-600 p-2">
-          <i class="fas fa-comment-dots text-xl"></i>
-        </a>
-
-        <!--indicador -->
-        <button class="btn btn-ghost btn-circle">
-          <div class="indicator">
-            <i class="fas fa-heart text-xl"></i>
-            <span
-              class="badge badge-xs badge-primary indicator-item absolute top-0 right-0 bg-red-500 text-base rounded-full h-4 w-4 flex items-center justify-center border-0"
-              >3</span
-            >
-          </div>
-        </button>
-        <!-- fim indicador-->
-
-        <!--theme-->
-        <button class="btn btn-ghost btn-circle">
-          <label class="swap swap-rotate">
-            <input
-              type="checkbox"
-              class="theme-controller hidden"
-              value="dark"
-            />
-            <i class="fas fa-moon text-xl swap-off"></i>
-            <i class="fas fa-sun text-xl swap-on"></i>
-          </label>
-        </button>
-        <!--fim theme-->
-
-        <!-- Avatar -->
-        <div class="dropdown dropdown-end">
-          {% if current_user %}
-          <div
-            tabindex="0"
-            role="button"
-            class="btn btn-ghost btn-circle avatar online placeholder"
+    <div class="col-span-3 flex justify-end items-center space-x-4">
+      <button class="btn btn-ghost btn-circle">
+        <div class="indicator">
+          <i class="fas fa-heart text-xl"></i>
+          <span
+            class="badge badge-xs badge-primary indicator-item absolute top-0 right-0 bg-red-500 text-base rounded-full h-4 w-4 flex items-center justify-center border-0"
+            >3</span
           >
-            <div class="w-10 rounded-full">
-              {% if current_user.url_imagem_perfil %}
-              <img
-                alt="{{ current_user.primeiro_nome }}"
-                src="{{ url_for('static',  path=current_user.url_imagem_perfil) }}"
-                class="rounded-full w-10 h-10"
-                title="{{ current_user.primeiro_nome }}"
-              />
-
-              {% else %} {% if current_user.primeiro_nome %}
-              <span class="text-md" title="{{current_user.primeiro_nome}}"
-                >{{current_user.iniciais}}</span
-              >
-              {% endif %} {% endif %}
-            </div>
-          </div>
-          {% endif %} {% if current_user %}
-          <ul
-            tabindex="0"
-            class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-          >
-            <li>
-              <a href="/profile" class="justify-between"
-                >Meu Perfil
-                <i class="fas fa-user"></i>
-              </a>
-            </li>
-            <li>
-              <a class="justify-between">
-                Configurações <i class="fas fa-cog"></i>
-              </a>
-              {% if current_user.eh_gerente %}
-              <a href="/admin" class="justify-between">
-                Dashboard Admin
-                <i class="fas fa-tachometer-alt"></i>
-              </a>
-              {% endif %}
-            </li>
-            <hr class="my-1 border-base-200" />
-            <li>
-              <a href="/auth/logout" class="justify-between">
-                Sair <i class="fas fa-sign-out-alt"></i>
-              </a>
-            </li>
-          </ul>
-          {% elif request.path != '/auth/login' %}
-          <a href="/auth/login" class="btn bt-primary px-4 py-2 rounded-full">
-            Entrar
-          </a>
-          {% else %}
-          <a
-            href="/auth/register"
-            class="btn btn-primary px-4 py-2 rounded-full"
-          >
-            Registrar
-          </a>
-          {% endif %}
         </div>
-        <!-- fim -->
+      </button>
+
+      {% include 'base/partials/_theme_toggle.html' %}
+
+      <div class="dropdown dropdown-end">
+        {% if current_user %}
+        <div
+          tabindex="0"
+          role="button"
+          class="btn btn-ghost btn-circle avatar online placeholder"
+        >
+          <div class="w-10 rounded-full">
+            {% if current_user.url_imagem_perfil %}
+            <img
+              alt="{{ current_user.primeiro_nome }}"
+              src="{{ url_for('static',  path=current_user.url_imagem_perfil) }}"
+              class="rounded-full w-10 h-10"
+              title="{{ current_user.primeiro_nome }}"
+            />
+            {% else %} {% if current_user.primeiro_nome %}
+            <span class="text-md" title="{{current_user.primeiro_nome}}"
+              >{{current_user.iniciais}}</span
+            >
+            {% endif %} {% endif %}
+          </div>
+        </div>
+        {% endif %} {% if current_user %}
+        <ul
+          tabindex="0"
+          class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+        >
+          <li>
+            <a href="/profile" class="justify-between"
+              >Meu Perfil
+              <i class="fas fa-user"></i>
+            </a>
+          </li>
+          <li>
+            <a href="/posts" class="justify-between"
+              >Meus Posts
+              <i class="fas fa-clipboard-list"></i>
+            </a>
+          </li>
+          <li>
+            <a class="justify-between">
+              Configurações <i class="fas fa-cog"></i>
+            </a>
+            {% if current_user.eh_gerente %}
+            <a href="/admin" class="justify-between">
+              Dashboard Admin
+              <i class="fas fa-tachometer-alt"></i>
+            </a>
+            {% endif %}
+          </li>
+          <hr class="my-1 border-base-200" />
+          <li>
+            <a href="/auth/logout" class="justify-between">
+              Sair <i class="fas fa-sign-out-alt"></i>
+            </a>
+          </li>
+        </ul>
+        {% elif request.path != '/auth/login' %}
+        <a href="/auth/login" class="btn bt-primary px-4 py-2 rounded-full">
+          Entrar
+        </a>
+        {% else %}
+        <a href="/auth/register" class="btn btn-primary px-4 py-2 rounded-full">
+          Registrar
+        </a>
+        {% endif %}
       </div>
     </div>
   </div>

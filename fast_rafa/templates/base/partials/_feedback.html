@@ -1,0 +1,30 @@
+<div
+  id="mensagem-feedback"
+  class="fixed top-4 right-4 left-4 sm:left-auto max-w-sm z-50"
+  style="display: none"
+>
+  <div class="bg-neutral-100 border-l-4 p-4 shadow-md rounded-md">
+    <div class="flex items-center">
+      <div class="flex-shrink-0">
+        <i
+          id="icone-feedback"
+          class="fas fa-check-circle text-green/50 text-xl"
+        ></i>
+      </div>
+      <div class="ml-3">
+        <p id="texto-feedback" class="text-sm font-medium"></p>
+      </div>
+      <div class="ml-auto pl-3">
+        <div class="-mx-1.5 -my-1.5">
+          <button
+            onclick="document.getElementById('mensagem-feedback').style.display = 'none'"
+            class="text-primary-400 hover:text-primary/50"
+          >
+            <span class="sr-only">Fechar</span>
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+<div class="bg-base-100 rounded-lg shadow-md">
+  <div class="flex items-center justify-between mb-6">
+    <h4 class="text-xl font-bold text-primary">Organizações Sugeridas</h4>
+    <a href="/organizations" class="text-sm text-secondary hover:underline"
+      >Ver todas</a
+    >
+  </div>
+
+  <div class="space-y-4">
+    {% for org, post_count in suggested_orgs %}
+    <div class="group">
+      <a
+        href="/organizations/{{ org.id }}"
+        class="flex items-center justify-between p-4 bg-base-200 rounded-lg transition-all duration-300 hover:bg-base-300 hover:shadow-md"
+      >
+        <div class="flex items-center space-x-4">
+          {% if org.url_logo %}
+          <img
+            src="{{ org.url_logo }}"
+            alt="{{ org.nome }}"
+            class="w-12 h-12 rounded-full object-cover"
+          />
+          {% else %}
+          <div
+            class="w-12 h-12 bg-base-300 rounded-full flex items-center justify-center"
+          >
+            <i class="fas fa-building text-base-content"></i>
+          </div>
+          {% endif %}
+
+          <div>
+            <h5
+              class="font-semibold text-base-content group-hover:text-primary transition-colors"
+            >
+              {{ org.nome }}
+            </h5>
+            <p class="text-xs text-base-500">
+              {{ org.cidade }}, {{ org.estado }}
+            </p>
+          </div>
+        </div>
+
+        <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+          <i class="fas fa-chevron-right text-secondary"></i>
+        </div>
+      </a>
+    </div>
+    {% else %}
+    <div class="alert alert-ghost text-center">
+      <span>Nenhuma organização sugerida no momento</span>
+    </div>
+    {% endfor %} {% if suggested_organizations|length > 5 %}
+    <div class="text-center mt-6">
+      <button class="btn btn-ghost btn-sm">Carregar mais organizações</button>
+    </div>
+    {% endif %}
+  </div>
+</div>

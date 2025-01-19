@@ -1,0 +1,223 @@
+{% macro truncate_text(text, max_length=280) %} {% if text|length > max_length
+%} {{ text[:max_length] ~ '...' }} {% else %} {{ text }} {% endif %} {% endmacro
+%} {% if posts %} {% for post in posts %}
+<div class="card bg-base-100 rounded-lg overflow-hidden relative">
+  <div class="card-inner">
+    <div class="box">
+      <div class="imgBox relative">
+        {% if post.url_imagem_post %}
+        <div
+          class="absolute inset-0 flex items-center justify-center bg-opacity-50 bg-primary z-10"
+        >
+          <svg
+            class="animate-spin h-12 w-12 text-blue-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="4"
+              d="M4 12a8 8 0 0116 0"
+            ></path>
+          </svg>
+        </div>
+        <img
+          src="{{ post.url_imagem_post }}"
+          alt="Post image"
+          class="object-cover rounded-lg cursor-pointer post-image w-full h-full transition-transform duration-300 ease-in-out transform hover:scale-110"
+          data-title="{{ post.titulo }}"
+          data-description="{{ post.descricao }}"
+          data-category="{{ post.categories.categoria }}"
+          data-likes="{{ post.total_likes }}"
+          data-comments="{{ post.comments_count }}"
+          data-username="@{{ post.uploader.username }}"
+          data-avatar="{{ post.uploader.url_imagem_perfil }}"
+          data-date="{{ post.criado_em }}"
+          data-categoryslug="{{ post.categories.slug }}"
+          data-postid="{{ post.id }}"
+          data-userid="{{ current_user.id }}"
+          data-favoritado="{{ post.eh_favorito }}"
+          onload="this.previousElementSibling.style.display = 'none'; this.style.display = 'block';"
+        />
+        /> /> {% endif %}
+      </div>
+      <div class="icon bg-b1">
+        <a class="iconBox {{post.categories.slug}}" href="/posts/{{ post.id }}">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body my-4">
+    <h3 class="card-title">{{ post.titulo }}</h3>
+    <div class="flex items-center justify-between">
+      <p class="text-xs text-base-content/60">{{ post.criado_em_formatada }}</p>
+
+      <button
+        class="{{ post.categories.slug }} btn btn-xs btn-outline text-base-100"
+      >
+        <i class="fas fa-tag mr-1 tag-{{ post.categories.slug }}"></i>
+        {{ post.categories.categoria }}
+      </button>
+    </div>
+    <p class="mt-2">{{ truncate_text(post.descricao, 140) }}</p>
+
+    <div class="card-actions justify-between items-center mt-4">
+      <div class="post-interactions flex space-x-4 pt-4">
+        <button
+          id="like-button"
+          class="likes flex items-center space-x-2 hover:text-red-500 transition"
+          data-post-id="{{ post.id}}"
+          data-user-id="{{current_user.id}}"
+        >
+          {% if post.eh_favorito %}
+          <i id="like-icon" class="fas fa-heart"></i>
+          {% else %}
+          <i id="like-icon" class="far fa-heart"></i>
+          {% endif %}
+          <span id="likes-count">{{ post.total_likes }}</span>
+        </button>
+        <button
+          class="comments flex items-center space-x-2 hover:text-blue-500 transition"
+        >
+          <i class="far fa-comment"></i>
+          <span id="modal-comments-count">0</span>
+        </button>
+        <div class="dropdown dropdown-top">
+          <button
+            tabindex="0"
+            role="button"
+            class="flex items-end space-x-1"
+            id="shareBtn"
+          >
+            <i class="far fa-share-square"></i>
+            <ul
+              tabindex="0"
+              class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+            >
+              <li>
+                <a
+                  href="https://twitter.com/intent/tweet?url={{ post.url_imagem_post }}&text={{ post.titulo }}"
+                  target="_blank"
+                  class="block p-1 text-blue-500 hover:bg-secondary"
+                  >Twitter</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://www.facebook.com/sharer/sharer.php?u={{ post.url_imagem_post }}"
+                  target="_blank"
+                  class="block p-1 text-blue-700 hover:bg-secondary"
+                  >Facebook</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://api.whatsapp.com/send?text={{ post.url_imagem_post }}"
+                  target="_blank"
+                  class="block p-1 text-green-500 hover:bg-secondary"
+                  >WhatsApp</a
+                >
+              </li>
+            </ul>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+  </div>
+</div>
+{% endfor %} {% else %}
+<div class="bg-base-100 rounded-lg shadow-sm p-4">
+  <h4 class="font-semibold text-center">Nenhuma postagem encontrada</h4>
+</div>
+{% endif %}
+
+<input type="checkbox" id="image-modal-toggle" class="modal-toggle" />
+<div class="modal" id="image-modal" role="dialog">
+  <div
+    class="modal-box p-0 bg-black bg-opacity-90 max-w-6xl w-full max-h-[90vh] flex flex-col lg:flex-row"
+  >
+    <div class="w-full lg:w-3/4 flex items-center justify-center bg-black">
+      <img
+        id="modal-large-image"
+        class="max-w-full max-h-[80vh] object-contain"
+        src="https://browsee.io/blog/content/images/2019/03/testing.jpg"
+        alt="Post Image"
+      />
+    </div>
+
+    <div class="w-full lg:w-1/4 p-6 overflow-y-auto flex flex-col bg-base-100">
+      <div class="flex items-center mb-4">
+        <img
+          id="modal-user-avatar"
+          class="w-10 h-10 rounded-full mr-3"
+          src="https://via.placeholder.com/40"
+          alt="User Avatar"
+        />
+        <div>
+          <h3 id="modal-username" class="font-bold text-sm">Nome do Usuário</h3>
+          <p id="modal-date" class="text-xs text-base-500">Há 2 horas</p>
+        </div>
+      </div>
+
+      <div class="flex-grow">
+        <h3 id="modal-title" class="text-2xl font-bold mb-3">
+          Repellendus dolores sed nesciunt facilis.
+        </h3>
+        <p id="modal-description" class="mb-4">
+          Quo veritatis vero libero voluptatem quia officia. Impedit vel autem
+          consequuntur veritatis aspernatur earum. Porro dolore minima quasi
+          modi dolores eveniet.
+        </p>
+        <div class="post-categories flex space-x-2 mb-4">
+          <span
+            id="modal-category"
+            class="px-3 py-1 rounded-full laticinios text-sm"
+          >
+            Vegetais
+          </span>
+        </div>
+      </div>
+
+      <div class="post-interactions flex space-x-4 border-t pt-4">
+        <button
+          id="like-button"
+          class="likes flex items-center space-x-2 hover:text-red-500 transition"
+        >
+          <i class="far fa-heart"></i>
+          <span id="modal-likes-count">0</span>
+        </button>
+        <button
+          class="comments flex items-center space-x-2 hover:text-blue-500 transition"
+        >
+          <i class="far fa-comment"></i>
+          <span id="modal-comments-count">0</span>
+        </button>
+        <button
+          class="share flex items-center space-x-2 hover:text-green-500 transition"
+        >
+          <i class="far fa-share-square"></i>
+        </button>
+      </div>
+    </div>
+
+    <label
+      for="image-modal-toggle"
+      class="absolute top-4 right-4 text-3xl cursor-pointer transition"
+    >
+      ✕
+    </label>
+  </div>
+</div>

@@ -24,7 +24,7 @@ router = APIRouter()
 @router.post(
     '/{id_usuario}/{id_postagem}',
     status_code=HTTPStatus.CREATED,
-    response_model=Favorite,
+    response_model=dict,  # Alteramos para aceitar um dicionário de resposta
 )
 def create_favorite(
     id_usuario: int, id_postagem: int, db: Session = Depends(get_session)
@@ -59,6 +59,16 @@ def create_favorite(
         db.add(novo_favorito)
         db.commit()
         db.refresh(novo_favorito)
+
+        # Conta o número total de likes para esta postagem
+        total_likes = (
+            db.query(Favorite)
+            .filter(Favorite.id_postagem == id_postagem)
+            .count()
+        )
+
+        return {'favorite': novo_favorito, 'total_likes': total_likes}
+
     except IntegrityError as e:
         db.rollback()
         error_message = str(e.orig)
@@ -82,8 +92,6 @@ def create_favorite(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail=get_creation_error_message('favorito', str(e)),
         )
-
-    return novo_favorito
 
 
 @router.get('/{id_favorite}', status_code=HTTPStatus.OK)
@@ -158,7 +166,7 @@ def read_favorites_by_post(
 @router.delete(
     '/{id_favorite}',
     status_code=HTTPStatus.OK,
-    response_model=Favorite.DeleteResponseFavorite,
+    response_model=dict,  # Alteramos para aceitar um dicionário de resposta
 )
 def delete_favorite(id_favorite: int, db: Session = Depends(get_session)):
     favorito = db.query(Favorite).filter(Favorite.id == id_favorite).first()
@@ -169,8 +177,21 @@ def delete_favorite(id_favorite: int, db: Session = Depends(get_session)):
         )
 
     try:
+        id_postagem = favorito.id_postagem
         db.delete(favorito)
         db.commit()
+
+        # Conta o número total de likes após a remoção
+        total_likes = (
+            db.query(Favorite)
+            .filter(Favorite.id_postagem == id_postagem)
+            .count()
+        )
+
+        return {
+            'message': get_success_message('Favorito excluído'),
+            'total_likes': total_likes,
+        }
     except IntegrityError as e:
         db.rollback()
         error_message = str(e.orig)
@@ -193,7 +214,3 @@ def delete_favorite(id_favorite: int, db: Session = Depends(get_session)):
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail=get_unexpected_error_message('excluir favorito', str(e)),
         )
-
-    return Favorite.DeleteResponseFavorite(
-        message=get_success_message('Favorito excluído'),
-    )
