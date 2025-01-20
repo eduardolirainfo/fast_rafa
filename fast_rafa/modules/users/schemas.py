@@ -120,7 +120,7 @@ class CreateUser(BaseModel):
     sobrenome: constr(max_length=50)
     email: EmailStr
     username: constr(max_length=50)
-    senha_hash: constr(max_length=255)
+    senha_hash: str
     telefone: constr(max_length=20)
     deficiencia_auditiva: Optional[bool] = None
     usa_cadeira_rodas: Optional[bool] = None
@@ -161,7 +161,7 @@ class UpdateUserRequest(BaseModel):
     sobrenome: Optional[constr(max_length=50)] = None
     email: Optional[str] = None
     username: Optional[str] = None
-    senha_hash: Optional[constr(max_length=255)] = None
+    senha_hash: Optional[str] = None
     telefone: Optional[constr(max_length=20)] = None
     deficiencia_auditiva: Optional[bool] = None
     usa_cadeira_rodas: Optional[bool] = None

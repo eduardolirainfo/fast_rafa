@@ -1,7 +1,7 @@
 FROM python:3.13-slim
 ENV POETRY_VIRTUALENVS_CREATE=false
 
-WORKDIR fast_rafa/
+WORKDIR app/
 COPY . .
 
 RUN pip install poetry
