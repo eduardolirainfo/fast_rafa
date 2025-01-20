@@ -91,9 +91,14 @@ async def seed_organizations(session):
                     url_imagem = generate_unique_url(
                         session, Organization, is_logo=False
                     )
+                cidade = fake.random_element(cidades_rio)
+                if len(cidade) > 17:
+                    cidade = cidade[:17]
 
                 dados = {
-                    'id_federal': str(fake.unique.random_number(digits=14)),
+                    'id_federal': str(
+                        fake.unique.random_number(digits=11)
+                    ).zfill(11),
                     'nao_governamental': fake.boolean(
                         chance_of_getting_true=50
                     ),
@@ -102,13 +107,14 @@ async def seed_organizations(session):
                     'abertura': gen_random_time(),
                     'fechamento': gen_random_time(),
                     'intervalo': f'{gen_random_time()} - {gen_random_time()}',
-                    'nome': fake.company(),
+                    'nome': fake.unique.company()[:100],
                     'descricao': fake.text(max_nb_chars=200),
                     'rua': fake.street_name(),
                     'cep': fake.postcode(),
-                    'cidade': fake.random_element(cidades_rio),
-                    'estado': 'Rio de Janeiro',
-                    'telefone': fake.phone_number(),
+                    'cidade': cidade,
+                    'estado': 'RJ',
+                    'telefone': '21'
+                    + str(fake.unique.random_number(digits=9)),
                     'email': fake.unique.email(),
                     'criado_em': datetime.utcnow(),
                     'atualizado_em': datetime.utcnow(),

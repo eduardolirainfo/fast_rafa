@@ -1,8 +1,8 @@
-"""update na url da imagem do perfil
+"""Criar tabelas
 
-Revision ID: ef8846c9df31
+Revision ID: b55a7f4dacdd
 Revises: 
-Create Date: 2024-11-24 12:29:25.785812
+Create Date: 2025-01-19 20:07:54.435636
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ef8846c9df31'
+revision: str = 'b55a7f4dacdd'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

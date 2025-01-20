@@ -31,13 +31,16 @@ async def get_organizacoes(session) -> list:
 async def criar_usuario(session, organizacoes: list) -> Optional[User]:
     """Tenta criar um único usuário"""
     try:
+        telefone = '21' + str(fake.unique.random_number(digits=9))
+        print(f"Telefone gerado: '{telefone}' (Tamanho: {len(telefone)})")
+        telefone = telefone.strip()
         dados = {
-            'primeiro_nome': fake.first_name(),
-            'sobrenome': fake.last_name(),
+            'primeiro_nome': fake.first_name()[:100],
+            'sobrenome': fake.last_name()[:100],
             'email': fake.unique.email(),
             'username': fake.user_name(),
-            'senha_hash': get_password_hash(fake.password()),
-            'telefone': fake.phone_number()[:20],
+            'senha_hash': get_password_hash(fake.password())[:60],
+            'telefone': telefone,
             'eh_deleted': fake.boolean(chance_of_getting_true=5),
             'eh_voluntario': fake.boolean(chance_of_getting_true=50),
             'eh_gerente': fake.boolean(chance_of_getting_true=50),

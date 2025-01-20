@@ -12,7 +12,7 @@ def get_suggested_organizations(db: Session, user_organization_id: int):
         .filter(
             Post.status == 1,
             Post.data_validade >= func.now(),
-            Post.quantidade > 0,
+            Post.quantidade != '',
             Post.id_organizacao != user_organization_id,
         )
         .group_by(Organization.id)

@@ -74,155 +74,80 @@
 
 # Diagrama de Entidade-Relacionamento (ER)
 
-```mermaid
-erDiagram
-    USERS ||--o{ POSTS : "cria"
-    USERS ||--o{ EVENTS : "cria"
-    USERS ||--o{ FAVORITES : "favorita"
-    USERS ||--o{ MESSAGES : "envia"
-    USERS }|--|| ORGANIZATIONS : "pertence"
-    USERS {
+```erDiagram
+    organizations ||--o{ users : has
+    organizations ||--o{ posts : publishes
+    organizations ||--o{ events : organizes
+    organizations ||--o{ calendars : has
+    organizations ||--o{ deliveries : handles
+    organizations ||--o{ watchlists : monitors
+
+    users ||--o{ posts : creates
+    users ||--o{ events : creates
+    users ||--o{ deliveries : manages
+    users ||--o{ favorites : has
+    users ||--o{ messages : sends
+    users ||--o{ watchlists : tracked_in
+    users ||--o{ message_its : participates
+
+    categories_main ||--o{ categories : contains
+    categories ||--o{ posts : categorizes
+
+    posts ||--o{ favorites : receives
+    posts ||--o{ deliveries : has
+    posts ||--o{ messages : referenced_in
+
+    message_its ||--o{ messages : contains
+
+    organizations {
         int id PK
-        string primeiro_nome
-        string sobrenome
+        string id_federal UK
+        bool nao_governamental
+        string url_logo UK
+        string url_imagem UK
+        string nome UK
+        string email UK
+        string telefone UK
+        datetime criado_em
+    }
+
+    users {
+        int id PK
         string email UK
         string username UK
         string senha_hash
-        string telefone
         int id_organizacao FK
-        boolean eh_deletado
-        boolean eh_voluntario
-        boolean eh_gerente
-        boolean deficiencia_auditiva
-        boolean usa_cadeira_rodas
-        boolean deficiencia_cognitiva
-        boolean lgbtq
-        string url_imagem_perfil
+        bool eh_voluntario
+        bool eh_gerente
         datetime criado_em
-        datetime atualizado_em
     }
 
-    ORGANIZATIONS ||--o{ POSTS : "possui"
-    ORGANIZATIONS ||--o{ EVENTS : "organiza"
-    ORGANIZATIONS ||--|| CALENDARS : "tem"
-    ORGANIZATIONS ||--o{ DELIVERIES : "participa"
-    ORGANIZATIONS {
+    posts {
         int id PK
-        string id_federal UK
-        boolean nao_governamental
-        string url_logo UK
-        string url_imagem UK
-        string abertura
-        string fechamento
-        string intervalo
-        string nome UK
-        string descricao
-        string rua
-        string cep
-        string cidade
-        string estado
-        string telefone UK
-        string email UK
-        datetime criado_em
-        datetime atualizado_em
-    }
-
-    POSTS ||--o{ FAVORITES : "recebe"
-    POSTS ||--|| DELIVERIES : "gera"
-    POSTS }|--|| CATEGORIES : "pertence"
-    POSTS {
-        int id PK
-        boolean item
+        bool item
         int id_organizacao FK
         int id_usuario FK
         string titulo
-        string descricao
-        string quantidade
         int id_categoria FK
-        string url_imagem_post
         date data_validade
-        int status
         datetime criado_em
-        datetime atualizado_em
     }
 
-    CATEGORIES {
+    categories {
         int id PK
+        int id_categoria_principal FK
         string categoria UK
-        datetime criado_em
-        datetime atualizado_em
-    }
-
-    EVENTS {
-        int id PK
-        int id_organizacao FK
-        int id_usuario FK
-        datetime fechado
-        string titulo
-        string descricao
-        datetime data
-        string url_imagem
-        datetime criado_em
-        datetime atualizado_em
-    }
-
-    CALENDARS {
-        int id PK
-        int id_organizacao FK
-        datetime abertura
-        datetime fechamento
-        datetime criado_em
-        datetime atualizado_em
-    }
-
-    MESSAGE_ITS ||--o{ MESSAGES : "contem"
-    MESSAGE_ITS {
-        int id PK
-        int usuario_um FK
-        int usuario_dois FK
+        string slug UK
         datetime criado_em
     }
 
-    MESSAGES {
+    deliveries {
         int id PK
-        int id_mensagem_it FK
-        int id_remetente FK
-        int id_postagem FK
-        string conteudo
-        string url_imagem
-        datetime criado_em
-        datetime atualizado_em
-    }
-
-    DELIVERIES {
-        int id PK
-        boolean entrega_direta
-        int id_postagem FK
+        int id_postagem FK "UK"
         int id_usuario FK
         int id_organizacao FK
         int id_ong FK
         date data
-        string hora
-        int completo
-        string motivo_cancelamento
-        datetime criado_em
-        datetime atualizado_em
-    }
-
-    WATCHLISTS {
-        int id PK
-        int id_organizacao FK
-        int id_usuario FK
-        string endereco_ip
-        int quantidade
-        datetime criado_em
-    }
-
-    FAVORITES {
-        int id PK
-        int id_postagem FK
-        int id_usuario FK
         datetime criado_em
     }
 ```
- 

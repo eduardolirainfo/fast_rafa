@@ -52,8 +52,8 @@ async def seed_posts(session: Session):
             'item': fake.boolean(),
             'id_organizacao': choice(organizacao_ids),
             'id_usuario': choice(usuario_ids),
-            'titulo': fake.sentence(nb_words=5),
-            'descricao': fake.paragraph(nb_sentences=3),
+            'titulo': fake.sentence(nb_words=5)[:25],
+            'descricao': fake.paragraph(nb_sentences=3)[:120],
             'quantidade': f'{fake.random_int(min=1, max=100)} unidades',
             'id_categoria': choice(categoria_ids),
             'url_imagem_post': 'https://picsum.photos/id/'
