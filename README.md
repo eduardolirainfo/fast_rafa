@@ -74,7 +74,8 @@
 
 # Diagrama de Entidade-Relacionamento (ER)
 
-```erDiagram
+```mermaid
+erDiagram
     organizations ||--o{ users : has
     organizations ||--o{ posts : publishes
     organizations ||--o{ events : organizes
